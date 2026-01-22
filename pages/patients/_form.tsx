@@ -230,49 +230,73 @@ export default function PatientForm({
           </div>
           <div className="grid grid-cols-3 gap-2 w-full">
             <div className="w-full flex flex-col justify-end">
-              <label className="block mb-1">Celular 1:</label>
-              <input
-                type="text"
-                value={formData.cellphoneNumber || ''}
-                onChange={(e) => setFormData({ ...formData, cellphoneNumber: e.target.value })}
-                className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <label className="flex flex-col justify-end">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+                <input
+                  type="text"
+                  value={formData.cellphoneNumber || ''}
+                  onChange={(e) => setFormData({ ...formData, cellphoneNumber: e.target.value })}
+                  className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
             </div>
             <div className="w-full flex flex-col justify-end">
-              <label className="block mb-1">Celular 2:</label>
-              <input
-                type="text"
-                value={formData.cellphoneNumberTwo || ''}
-                onChange={(e) => setFormData({ ...formData, cellphoneNumberTwo: e.target.value })}
-                className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <label className="flex flex-col justify-end">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+                <input
+                  type="text"
+                  value={formData.cellphoneNumberTwo || ''}
+                  onChange={(e) => setFormData({ ...formData, cellphoneNumberTwo: e.target.value })}
+                  className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
             </div>
             <div className="w-full flex flex-col justify-end">
-              <label className="block mb-1">Celular 3:</label>
-              <input
-                type="text"
-                value={formData.cellphoneNumberThree || ''}
-                onChange={(e) => setFormData({ ...formData, cellphoneNumberThree: e.target.value })}
-                className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <label className="flex flex-col justify-end">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                  <path d="M12 18h.01" />
+                </svg>
+                <input
+                  type="text"
+                  value={formData.cellphoneNumberThree || ''}
+                  onChange={(e) => setFormData({ ...formData, cellphoneNumberThree: e.target.value })}
+                  className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
             </div>
             <div className="w-full flex flex-col justify-end">
-              <label className="block mb-1">Teléfono:</label>
-              <input
-                type="text"
-                value={formData.phoneNumber || ''}
-                onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <label className="flex flex-col justify-end">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <path d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384" />
+                </svg>
+                <input
+                  type="text"
+                  value={formData.phoneNumber || ''}
+                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                  className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
             </div>
             <div className="w-full flex flex-col justify-end col-span-2">
-              <label className="block mb-1">Email:</label>
-              <input
-                type="email"
-                value={formData.email || ''}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              />
+              <label className="flex flex-col justify-end">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                </svg>
+                <input
+                  type="email"
+                  value={formData.email || ''}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </label>
             </div>
           </div>
           <div>
