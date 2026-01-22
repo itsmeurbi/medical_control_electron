@@ -7,9 +7,10 @@
     "dev": "concurrently \"npm run dev:next\" \"npm run dev:electron\"",
     "dev:next": "next dev",
     "dev:electron": "wait-on http://localhost:3000 && electron .",
+    "dev:prod": "npm run build && NODE_ENV=production electron .",
     "build": "next build",
-    "build:electron": "npm run build && electron-builder",
-    "build:mac": "npm run build && electron-builder --mac",
+    "build:electron": "next build && electron-builder",
+    "build:mac": "next build && electron-builder --mac",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
@@ -37,7 +38,7 @@
     "electron-builder": "^26.4.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.4",
-    "prisma": "^6.19.2",
+    "prisma": "^7.3.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "wait-on": "^7.2.0"
@@ -50,10 +51,12 @@
     },
     "files": [
       "main/**/*",
+      "lib/**/*",
       ".next/standalone/**/*",
       ".next/static/**/*",
       "public/**/*",
       "database/**/*",
+      "prisma/**/*",
       "package.json"
     ],
     "mac": {
@@ -61,7 +64,10 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": [
+            "x64",
+            "arm64"
+          ]
         }
       ]
     },
