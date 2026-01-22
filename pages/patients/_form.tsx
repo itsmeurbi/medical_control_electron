@@ -15,6 +15,15 @@ interface PatientFormProps {
   treatment: { date: string; procedure: string; meds: string };
   setTreatment: (treatment: { date: string; procedure: string; meds: string }) => void;
   treatments?: Consultation[];
+  treatmentPagination?: {
+    page: number;
+    totalPages: number;
+    totalCount: number;
+  };
+  onTreatmentDelete?: (id: number) => void;
+  onTreatmentEdit?: (consultation: Consultation) => void;
+  onTreatmentAdd?: (treatment: { date: string; procedure: string; meds: string }) => Promise<void>;
+  onTreatmentPageChange?: (page: number) => void;
 }
 
 export default function PatientForm({
@@ -28,6 +37,11 @@ export default function PatientForm({
   treatment,
   setTreatment,
   treatments = [],
+  treatmentPagination,
+  onTreatmentDelete,
+  onTreatmentEdit,
+  onTreatmentAdd,
+  onTreatmentPageChange,
 }: PatientFormProps) {
   const [age, setAge] = useState<number | null>(
     formData.birthDate ? calculateAge(formData.birthDate) : null
@@ -821,40 +835,160 @@ export default function PatientForm({
         {/* Treatment Form Tab */}
         {activeTab === 'treatment-form' && (
           <div className="grid grid-cols-2 block shadow rounded bg-white p-4">
-            {isEdit && treatments && treatments.length > 0 ? (
-              <div className="border-solid border-r border-gray-400 pr-4">
-                <h3 className="text-lg font-bold mb-2">Tratamientos Existentes</h3>
-                <div className="max-h-96 overflow-y-auto">
-                  <ul className="space-y-2">
-                    {treatments.map((t) => (
-                      <li key={t.id} className="border-b pb-2">
-                        <div className="text-sm">
-                          <p className="font-semibold">
-                            {t.date ? new Date(t.date).toLocaleDateString() : 'Sin fecha'}
-                          </p>
-                          {t.procedure && (
-                            <p className="mt-1">
-                              <span className="font-medium">Procedimiento:</span> {t.procedure}
-                            </p>
-                          )}
-                          {t.meds && (
-                            <p className="mt-1">
-                              <span className="font-medium">Medicamentos:</span> {t.meds}
-                            </p>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+            {isEdit ? (
+              <div className="flex flex-col justify-between border-solid border-r border-gray-400 pr-4">
+                <div id="treatments_list">
+                  <h2 className="text-lg mb-2">Historial de tratamientos</h2>
+                  {treatments && treatments.length > 0 ? (
+                    treatments.map((t) => (
+                      <div key={t.id} className="relative">
+                        <button
+                          type="button"
+                          onClick={() => onTreatmentEdit && onTreatmentEdit(t)}
+                          className="text-blue-800 hover:text-blue-900 hover:bg-gray-200 rounded p-1 cursor-pointer absolute top-0 right-0"
+                          title="Editar"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                          </svg>
+                        </button>
+                        <h4 className="text-md">F. del tratamiento:</h4>
+                        <p className="ml-2">
+                          {t.date
+                            ? new Date(t.date).toLocaleDateString('es-ES', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                              })
+                            : 'Sin fecha'}
+                        </p>
+                        {t.procedure && (
+                          <>
+                            <h4 className="text-md mt-2">Procedimiento:</h4>
+                            <p className="ml-2 whitespace-pre-line">{t.procedure}</p>
+                          </>
+                        )}
+                        {t.meds && (
+                          <>
+                            <h4 className="text-md mt-2">Medicamentos:</h4>
+                            <p className="ml-2 whitespace-pre-line">{t.meds}</p>
+                          </>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (window.confirm('¿Estas seguro que deseas eliminar de forma permanente este tratamiento?')) {
+                              if (onTreatmentDelete && t.id) {
+                                onTreatmentDelete(t.id);
+                              }
+                            }
+                          }}
+                          className="text-red-600 text-sm mt-2 block p-1 hover:bg-gray-200 rounded cursor-pointer"
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No hay tratamientos registrados.</p>
+                  )}
                 </div>
-              </div>
-            ) : isEdit ? (
-              <div className="border-solid border-r border-gray-400 pr-4">
-                <p className="text-gray-500">No hay tratamientos registrados.</p>
+                {treatmentPagination && treatmentPagination.totalPages > 1 && (
+                  <div id="treatments_pagination" className="mt-4">
+                    <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm">
+                      {/* Previous Button */}
+                      <button
+                        type="button"
+                        onClick={() => onTreatmentPageChange && onTreatmentPageChange(treatmentPagination.page - 1)}
+                        disabled={treatmentPagination.page === 1}
+                        className={`relative inline-flex items-center rounded-l-md border px-2 py-2 text-sm font-medium focus:z-20 cursor-pointer ${
+                          treatmentPagination.page === 1
+                            ? 'border-gray-300 bg-slate-100 text-gray-500'
+                            : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="sr-only">Anterior</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+
+                      {/* Page Numbers */}
+                      {(() => {
+                        const current = treatmentPagination.page;
+                        const total = treatmentPagination.totalPages;
+                        const maxVisible = 7; // Fixed number of page buttons
+
+                        let start: number;
+                        let end: number;
+
+                        if (total <= maxVisible) {
+                          // If total pages is less than max visible, show all
+                          start = 1;
+                          end = total;
+                        } else {
+                          // Calculate sliding window
+                          const halfWindow = Math.floor(maxVisible / 2);
+
+                          if (current <= halfWindow + 1) {
+                            // Near the start: show first pages
+                            start = 1;
+                            end = maxVisible;
+                          } else if (current >= total - halfWindow) {
+                            // Near the end: show last pages
+                            start = total - maxVisible + 1;
+                            end = total;
+                          } else {
+                            // In the middle: center around current page
+                            start = current - halfWindow;
+                            end = current + halfWindow;
+                          }
+                        }
+
+                        const pages: number[] = [];
+                        for (let i = start; i <= end; i++) {
+                          pages.push(i);
+                        }
+
+                        return pages.map((page) => (
+                          <button
+                            key={page}
+                            type="button"
+                            onClick={() => onTreatmentPageChange && onTreatmentPageChange(page)}
+                            className={`relative inline-flex items-center border px-4 py-2 text-sm font-medium focus:z-20 cursor-pointer ${
+                              page === treatmentPagination.page
+                                ? 'z-10 border-blue-800 bg-indigo-50 text-blue-800'
+                                : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        ));
+                      })()}
+
+                      {/* Next Button */}
+                      <button
+                        type="button"
+                        onClick={() => onTreatmentPageChange && onTreatmentPageChange(treatmentPagination.page + 1)}
+                        disabled={treatmentPagination.page >= treatmentPagination.totalPages}
+                        className={`relative inline-flex items-center rounded-r-md border px-2 py-2 text-sm font-medium focus:z-20 cursor-pointer ${
+                          treatmentPagination.page >= treatmentPagination.totalPages
+                            ? 'border-gray-300 bg-slate-100 text-gray-500'
+                            : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-50'
+                        }`}
+                      >
+                        <span className="sr-only">Siguiente</span>
+                        <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                          <path fillRule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                    </nav>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="border-solid border-r border-gray-400 pr-4">
-                <p className="text-gray-500">Los tratamientos adicionales se pueden agregar después de crear el paciente.</p>
+                <p className="text-gray-500">Los tratamientos se mostrarán aquí después de crear el paciente.</p>
               </div>
             )}
             <div className="border-solid border-l border-gray-400 pl-4">
@@ -876,7 +1010,7 @@ export default function PatientForm({
                   value={treatment.procedure}
                   onChange={(e) => setTreatment({ ...treatment, procedure: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
+                  rows={4}
                 />
               </div>
               <div className="w-full mt-2">
@@ -885,9 +1019,28 @@ export default function PatientForm({
                   value={treatment.meds}
                   onChange={(e) => setTreatment({ ...treatment, meds: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  rows={3}
+                  rows={4}
                 />
               </div>
+              {onTreatmentAdd && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (treatment.procedure || treatment.meds) {
+                      await onTreatmentAdd(treatment);
+                      // Reset treatment form
+                      setTreatment({
+                        date: new Date().toISOString().split('T')[0],
+                        procedure: '',
+                        meds: '',
+                      });
+                    }
+                  }}
+                  className="bg-blue-600 text-sm hover:bg-blue-800 shadow-sm text-white py-1 px-2 rounded block mr-2 cursor-pointer mt-2"
+                >
+                  Agregar
+                </button>
+              )}
             </div>
           </div>
         )}

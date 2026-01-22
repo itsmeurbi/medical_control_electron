@@ -145,7 +145,22 @@ export const consultationQueries = {
   findByPatientId: async (patientId: number) => {
     return prisma.consultation.findMany({
       where: { patientId },
-      orderBy: { date: 'desc' },
+      orderBy: { createdAt: 'desc' },
+    });
+  },
+
+  findByPatientIdPaginated: async (patientId: number, skip: number, take: number) => {
+    return prisma.consultation.findMany({
+      where: { patientId },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take,
+    });
+  },
+
+  countByPatientId: async (patientId: number) => {
+    return prisma.consultation.count({
+      where: { patientId },
     });
   },
 
