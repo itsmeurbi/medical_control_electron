@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { patientQueries } from '@/lib/database';
+import { patientQueries, consultationQueries } from '@/lib/database';
 import { calculateAge, generateMedicalRecord } from '@/lib/utils';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -36,7 +36,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Patient not found' });
       }
 
-      const data: Record<string, unknown> = { ...req.body };
+      // Extract treatment data before cleaning (it's not part of patient model)
+      const treatment = (req.body as Record<string, unknown>).treatment;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { treatment: _, ...patientDataWithoutTreatment } = req.body as Record<string, unknown>;
+
+      const data: Record<string, unknown> = { ...patientDataWithoutTreatment };
       if (data.registered_at) {
         data.registeredAt = new Date(data.registered_at as string).toISOString();
         delete data.registered_at;
@@ -47,6 +52,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const updatedPatient = await patientQueries.update(patientId, data);
+
+      // Create new treatment if provided
+      if (treatment && typeof treatment === 'object' && 'procedure' in treatment && 'meds' in treatment) {
+        const treatmentData = treatment as { date?: string; procedure?: string; meds?: string };
+        if (treatmentData.procedure || treatmentData.meds) {
+          try {
+            await consultationQueries.create({
+              patientId: updatedPatient.id,
+              date: treatmentData.date || new Date().toISOString(),
+              procedure: treatmentData.procedure || null,
+              meds: treatmentData.meds || null,
+            });
+          } catch (error) {
+            console.error('Error creating treatment:', error);
+            // Continue even if treatment creation fails
+          }
+        }
+      }
+
       const patientWithAge = {
         ...updatedPatient,
         age: calculateAge(updatedPatient.birthDate),

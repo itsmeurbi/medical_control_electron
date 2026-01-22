@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Consultation not found' });
       }
 
-      const data: any = { ...req.body };
+      const data: Record<string, unknown> = { ...req.body };
       if (data.date) {
         data.date = new Date(data.date).toISOString();
       }

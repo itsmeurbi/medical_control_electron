@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { Patient } from '@/lib/types';
 
@@ -29,7 +28,6 @@ const matchTypes = [
 ];
 
 export default function AdvanceSearch() {
-  const router = useRouter();
   const [attributeName, setAttributeName] = useState('');
   const [attributeValue, setAttributeValue] = useState('');
   const [matchType, setMatchType] = useState('exact');

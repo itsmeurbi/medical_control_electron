@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { patientQueries } from '@/lib/database';
+import { patientQueries, consultationQueries } from '@/lib/database';
 import { calculateAge, generateMedicalRecord } from '@/lib/utils';
 
 // Clean data for Prisma - remove undefined and convert empty strings to null
@@ -39,8 +39,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Name, registeredAt, and gender are required' });
       }
 
-      // Clean and prepare data
-      const cleaned = cleanData(patientData);
+      // Extract treatment data before cleaning (it's not part of patient model)
+      const treatment = patientData.treatment;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { treatment: _, ...patientDataWithoutTreatment } = patientData;
+
+      // Clean and prepare data (without treatment)
+      const cleaned = cleanData(patientDataWithoutTreatment);
 
       // Handle date conversions
       const data: Record<string, unknown> = {
@@ -57,6 +62,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (!patient) {
         return res.status(500).json({ error: 'Failed to create patient' });
       }
+
+      // Create initial treatment if provided
+      if (treatment && (treatment.procedure || treatment.meds)) {
+        try {
+          await consultationQueries.create({
+            patientId: patient.id,
+            date: treatment.date || new Date().toISOString(),
+            procedure: treatment.procedure || null,
+            meds: treatment.meds || null,
+          });
+        } catch (error) {
+          console.error('Error creating initial treatment:', error);
+          // Continue even if treatment creation fails
+        }
+      }
+
       const patientWithAge = {
         ...patient,
         age: calculateAge(patient.birthDate),

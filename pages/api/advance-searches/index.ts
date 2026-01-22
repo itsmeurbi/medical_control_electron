@@ -1,70 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { calculateAge, generateMedicalRecord } from '@/lib/utils';
 import prisma from '@/lib/database';
+import { Patient } from '@/lib/types';
 
-// Searchable attributes (string columns and enums)
-const searchableAttributes = [
-  'name',
-  'city',
-  'address',
-  'phoneNumber',
-  'medicalRecord',
-  'reference',
-  'occupations',
-  'alergies',
-  'painType',
-  'painLocalization',
-  'painEvolution',
-  'painDuration',
-  'painInitialState',
-  'painCurrentState',
-  'irradiations',
-  'previousTx',
-  'anticoagulants',
-  'cellphoneNumber',
-  'chronics',
-  'fiscalSituation',
-  'email',
-  'zipCode',
-  'cellphoneNumberTwo',
-  'cellphoneNumberThree',
-  'gender',
-  'maritalStatus',
-  'evera',
-  'bloodType',
-  'rhFactor'
-];
-
-async function advancedSearch(attributeName: string, attributeValue: string, matchType: string): Promise<any[]> {
+async function advancedSearch(attributeName: string, attributeValue: string, matchType: string): Promise<Patient[]> {
   if (!attributeName || !attributeValue) {
     return [];
   }
 
-  // Map camelCase to snake_case for database columns
-  const columnMap: Record<string, string> = {
-    'phoneNumber': 'phone_number',
-    'medicalRecord': 'medical_record',
-    'painType': 'pain_type',
-    'painLocalization': 'pain_localization',
-    'painEvolution': 'pain_evolution',
-    'painDuration': 'pain_duration',
-    'painInitialState': 'pain_initial_state',
-    'painCurrentState': 'pain_current_state',
-    'previousTx': 'previous_tx',
-    'cellphoneNumber': 'cellphone_number',
-    'fiscalSituation': 'fiscal_situation',
-    'zipCode': 'zip_code',
-    'maritalStatus': 'marital_status',
-    'bloodType': 'blood_type',
-    'rhFactor': 'rh_factor',
-    'cellphoneNumberTwo': 'cellphone_number_two',
-    'cellphoneNumberThree': 'cellphone_number_three',
-  };
-
-  const dbColumn = columnMap[attributeName] || attributeName;
   const searchValue = attributeValue.toLowerCase();
 
-  let whereClause: any = {};
+  const whereClause: Record<string, unknown> = {};
 
   if (['gender', 'maritalStatus', 'evera', 'bloodType', 'rhFactor'].includes(attributeName)) {
     // For enum fields, search by integer value
@@ -146,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const patientsWithAge = paginatedResults.map(patient => ({
         ...patient,
         age: calculateAge(patient.birthDate),
-        medical_record: patient.medicalRecord || generateMedicalRecord(patient.id)
+        medical_record: patient.medicalRecord || generateMedicalRecord(patient.id as number)
       }));
 
       res.status(200).json({
