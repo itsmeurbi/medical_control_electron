@@ -88,6 +88,7 @@ export default function NewPatient() {
         isEdit={false}
         treatment={treatment}
         setTreatment={setTreatment}
+        onCancel={() => router.push('/')}
       />
     </div>
   );

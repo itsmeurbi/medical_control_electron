@@ -5,10 +5,10 @@ import { Patient, Gender, MaritalStatus, Evera, BloodType, RhFactor, Consultatio
 import { calculateAge } from '@/lib/utils';
 
 interface PatientFormProps {
-  formData?: Partial<Patient>;
+  formData: Partial<Patient>;
   setFormData: (data: Partial<Patient>) => void;
-  errors?: Record<string, string>;
-  loading?: boolean;
+  errors: Record<string, string>;
+  loading: boolean;
   onSubmit: (e: React.FormEvent, treatment?: { date: string; procedure: string; meds: string }) => void;
   submitLabel: string;
   isEdit?: boolean;
@@ -24,13 +24,14 @@ interface PatientFormProps {
   onTreatmentEdit?: (consultation: Consultation) => void;
   onTreatmentAdd?: (treatment: { date: string; procedure: string; meds: string }) => Promise<void>;
   onTreatmentPageChange?: (page: number) => void;
+  onCancel?: () => void;
 }
 
 export default function PatientForm({
-  formData = {},
+  formData,
   setFormData,
-  errors = {},
-  loading = false,
+  errors,
+  loading,
   onSubmit,
   submitLabel,
   isEdit = false,
@@ -42,9 +43,10 @@ export default function PatientForm({
   onTreatmentEdit,
   onTreatmentAdd,
   onTreatmentPageChange,
+  onCancel,
 }: PatientFormProps) {
   const [age, setAge] = useState<number | null>(
-    formData?.birthDate ? calculateAge(formData.birthDate) : null
+    formData.birthDate ? calculateAge(formData.birthDate) : null
   );
   const [activeTab, setActiveTab] = useState('pain-form');
 
@@ -1071,6 +1073,15 @@ export default function PatientForm({
       </div>
 
       <div className="mt-4 flex justify-between items-center">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-4 rounded border cursor-pointer"
+          >
+            Regresar
+          </button>
+        )}
         <div className="flex">
           <button
             type="submit"

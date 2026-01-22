@@ -260,6 +260,7 @@ export default function EditPatient() {
           setTreatmentPage(page);
           fetchTreatments(page);
         }}
+        onCancel={() => router.push('/')}
       />
 
       {/* Edit Consultation Modal */}
