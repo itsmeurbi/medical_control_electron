@@ -1,78 +1,151 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+'use client';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { Patient } from '@/lib/types';
 
 export default function Home() {
+  const [searchText, setSearchText] = useState('');
+  const [searchResults, setSearchResults] = useState<Patient[]>([]);
+  const searchFieldRef = useRef<HTMLDivElement>(null);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Derive showSearchResults from state - no separate state needed
+  const showSearchResults = searchText.length > 1 && searchResults.length > 0;
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchFieldRef.current && !searchFieldRef.current.contains(event.target as Node)) {
+        setSearchResults([]);
+        setSearchText('');
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    if (searchText.length <= 1) {
+      // Don't call setState synchronously - just return early
+      // showSearchResults will be false automatically since searchText.length <= 1
+      return;
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      fetch(`/api/patients/search?text=${encodeURIComponent(searchText)}`)
+        .then(res => res.json())
+        .then(data => {
+          setSearchResults(data);
+        })
+        .catch(err => {
+          console.error('Error searching patients:', err);
+          setSearchResults([]);
+        });
+    }, 300); // Debounce for 300ms
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchText]);
+
+  const handleExport = () => {
+    window.location.href = '/api/patients/export';
+  };
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black`}
-    >
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the index.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen flex flex-col justify-between">
+      <div className="shadow-sm rounded p-4 m-4 bg-blue-50">
+        <h1 className="text-3xl font-bold mb-4 text-black flex justify-center text-blue-900">
+          Pacientes
+        </h1>
+        <div className="shadow-sm rounded p-4 mb-6 bg-white">
+          <div className="pb-4 bg-white mt-4 flex justify-between items-center relative">
+            <div className="flex items-start flex-col gap-2 w-3/6">
+              <div ref={searchFieldRef} className="w-full relative">
+                <label htmlFor="table-search" className="sr-only">Search</label>
+                <div className="relative mt-1">
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg
+                      className="w-5 h-5 text-gray-500"
+                      aria-hidden="true"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Busqueda por nombre"
+                    value={searchText}
+                    onChange={(e) => setSearchText(e.target.value)}
+                    className="rounded block p-2 pl-10 w-full text-sm text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+                {showSearchResults && searchResults.length > 0 && (
+                  <div className="shadow w-3/12 rounded absolute bg-white top-10 z-10">
+                    <ul id="patients-list" className="max-h-60 overflow-y-auto">
+                      {searchResults.map((patient) => (
+                        <li key={patient.id}>
+                          <Link
+                            href={`/patients/${patient.id}/edit`}
+                            className="flex hover:bg-blue-300 p-2"
+                            onClick={() => {
+                              setSearchResults([]);
+                              setSearchText('');
+                            }}
+                          >
+                            {patient.name}
+                          </Link>
+                          <hr />
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <Link
+                href="/advance-search"
+                className="text-blue-800 hover:text-blue-900 shrink-0"
+                title="Editar"
+              >
+                Busqueda Avanzada
+              </Link>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                href="/patients/new"
+                className="bg-blue-600 hover:bg-blue-800 shadow-sm text-white font-bold py-2 px-4 rounded"
+              >
+                Agregar paciente
+              </Link>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs/pages/getting-started?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
+      <div className="p-4 m-4 self-end">
+        <button
+          onClick={handleExport}
+          className="bg-green-600 hover:bg-green-800 shadow-sm text-white font-bold py-2 px-4 rounded"
+        >
+          Exportar Datos
+        </button>
+      </div>
     </div>
   );
 }
