@@ -3,8 +3,8 @@ import { patientQueries } from '@/lib/database';
 import { calculateAge, generateMedicalRecord } from '@/lib/utils';
 
 // Clean data for Prisma - remove undefined and convert empty strings to null
-function cleanData(data: any): any {
-  const cleaned: any = {};
+function cleanData(data: Record<string, unknown>): Record<string, unknown> {
+  const cleaned: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(data)) {
     if (value === undefined) continue;
     if (value === '' && key !== 'name' && key !== 'registeredAt' && key !== 'gender') {
@@ -43,17 +43,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const cleaned = cleanData(patientData);
 
       // Handle date conversions
-      const data: any = {
+      const data: Record<string, unknown> = {
         ...cleaned,
         registeredAt: cleaned.registeredAt
-          ? new Date(cleaned.registeredAt).toISOString()
+          ? new Date(cleaned.registeredAt as string).toISOString()
           : new Date().toISOString(),
         birthDate: cleaned.birthDate
-          ? new Date(cleaned.birthDate).toISOString()
+          ? new Date(cleaned.birthDate as string).toISOString()
           : null,
       };
 
       const patient = await patientQueries.create(data);
+      if (!patient) {
+        return res.status(500).json({ error: 'Failed to create patient' });
+      }
       const patientWithAge = {
         ...patient,
         age: calculateAge(patient.birthDate),

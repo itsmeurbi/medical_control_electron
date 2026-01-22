@@ -36,13 +36,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Patient not found' });
       }
 
-      const data: any = { ...req.body };
+      const data: Record<string, unknown> = { ...req.body };
       if (data.registered_at) {
-        data.registeredAt = new Date(data.registered_at).toISOString();
+        data.registeredAt = new Date(data.registered_at as string).toISOString();
         delete data.registered_at;
       }
       if (data.birth_date) {
-        data.birthDate = new Date(data.birth_date).toISOString();
+        data.birthDate = new Date(data.birth_date as string).toISOString();
         delete data.birth_date;
       }
 
