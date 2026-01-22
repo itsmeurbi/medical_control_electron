@@ -80,20 +80,20 @@ export interface Patient {
   cabinet?: string | null;
   consultations?: string | null;
   requestedStudies?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
   anticoagulants?: string | null;
   cellphoneNumber?: string | null;
   chronics?: string | null;
   fiscalSituation?: string | null;
   email?: string | null;
   zipCode?: string | null;
-  rx?: boolean;
-  cat?: boolean;
-  mri?: boolean;
-  us?: boolean;
-  do?: boolean;
-  emg?: boolean;
+  rx?: boolean | null;
+  cat?: boolean | null;
+  mri?: boolean | null;
+  us?: boolean | null;
+  do?: boolean | null;
+  emg?: boolean | null;
   spo2?: string | null;
   increasesWith?: string | null;
   decreasesWith?: string | null;
@@ -110,7 +110,7 @@ export interface Consultation {
   procedure?: string | null;
   meds?: string | null;
   date: string;
-  createdAt?: string;
-  updatedAt?: string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
   patient?: Patient;
 }

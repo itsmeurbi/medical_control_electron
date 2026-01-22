@@ -62,12 +62,12 @@ model Patient {
   fiscalSituation      String?        @map("fiscal_situation")
   email                String?
   zipCode              String?        @map("zip_code")
-  rx                   Int?           @default(0)
-  cat                  Int?           @default(0)
-  mri                  Int?           @default(0)
-  us                   Int?           @default(0)
-  do                   Int?           @default(0)
-  emg                  Int?           @default(0)
+  rx                   Boolean?       @default(false)
+  cat                  Boolean?       @default(false)
+  mri                  Boolean?       @default(false)
+  us                   Boolean?       @default(false)
+  do                   Boolean?       @default(false)
+  emg                  Boolean?       @default(false)
   spo2                 String?
   increasesWith        String?        @map("increases_with")
   decreasesWith        String?        @map("decreases_with")
