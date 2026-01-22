@@ -141,11 +141,11 @@ export default function PatientForm({
                 onChange={(e) =>
                   setFormData({ ...formData, gender: parseInt(e.target.value) as Gender })
                 }
-                className={`w-full rounded p-2 text-gray-900 border ${
+                className={`w-full rounded p-2 h-[42px] text-gray-900 border ${
                   errors.gender ? 'border-red-500' : 'border-gray-300'
                 } focus:ring-blue-500 focus:border-blue-500`}
               >
-                <option value="">Seleccionar</option>
+                <option value=""></option>
                 <option value={Gender.Masculino}>Masculino</option>
                 <option value={Gender.Femenino}>Femenino</option>
               </select>
@@ -161,9 +161,9 @@ export default function PatientForm({
                     maritalStatus: e.target.value ? (parseInt(e.target.value) as MaritalStatus) : undefined,
                   })
                 }
-                className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full rounded p-2 h-[42px] text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Seleccionar</option>
+                <option value=""></option>
                 <option value={MaritalStatus.Casado}>Casado</option>
                 <option value={MaritalStatus.Divorciado}>Divorciado</option>
                 <option value={MaritalStatus.Soltero}>Soltero</option>
@@ -194,7 +194,7 @@ export default function PatientForm({
                 />
               </div>
             </div>
-            <div className="w-full grid grid-cols-1 gap-2 mt-2">
+            <div className="w-full grid grid-cols-1 gap-2">
               <div className="w-full">
                 <label className="block mb-1">Ocupación:</label>
                 <textarea
@@ -461,9 +461,9 @@ export default function PatientForm({
                         evaluation: e.target.value ? parseInt(e.target.value) : undefined,
                       })
                     }
-                    className="w-11/12 rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-11/12 rounded p-2 h-[42px] text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Seleccionar</option>
+                    <option value=""></option>
                     {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
                       <option key={num} value={num}>
                         {num}
@@ -481,9 +481,9 @@ export default function PatientForm({
                         evera: e.target.value ? (parseInt(e.target.value) as Evera) : undefined,
                       })
                     }
-                    className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full rounded p-2 h-[42px] text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   >
-                    <option value="">Seleccionar</option>
+                    <option value=""></option>
                     <option value={Evera.Leve}>Leve</option>
                     <option value={Evera.Moderado}>Moderado</option>
                     <option value={Evera.Fuerte}>Fuerte</option>
@@ -583,9 +583,9 @@ export default function PatientForm({
                       bloodType: e.target.value ? (parseInt(e.target.value) as BloodType) : undefined,
                     })
                   }
-                  className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full rounded p-2 h-[42px] text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Seleccionar</option>
+                  <option value=""></option>
                   <option value={BloodType.A}>A</option>
                   <option value={BloodType.B}>B</option>
                   <option value={BloodType.AB}>AB</option>
@@ -602,9 +602,9 @@ export default function PatientForm({
                       rhFactor: e.target.value ? (parseInt(e.target.value) as RhFactor) : undefined,
                     })
                   }
-                  className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full rounded p-2 h-[42px] text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Seleccionar</option>
+                  <option value=""></option>
                   <option value={RhFactor.Negativo}>Negativo</option>
                   <option value={RhFactor.Positivo}>Positivo</option>
                 </select>
