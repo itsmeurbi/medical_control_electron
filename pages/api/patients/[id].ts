@@ -36,12 +36,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Patient not found' });
       }
 
-      // Extract treatment data before cleaning (it's not part of patient model)
+      // Extract treatment data and exclude relation/computed fields before cleaning
       const treatment = (req.body as Record<string, unknown>).treatment;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { treatment: _, ...patientDataWithoutTreatment } = req.body as Record<string, unknown>;
+      const {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        treatment: _treatment,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        treatments: _treatments,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        age: _age,
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        medical_record: _medical_record,
+        ...patientDataWithoutExtras
+      } = req.body as Record<string, unknown>;
 
-      const data: Record<string, unknown> = { ...patientDataWithoutTreatment };
+      const data: Record<string, unknown> = { ...patientDataWithoutExtras };
       if (data.registered_at) {
         data.registeredAt = new Date(data.registered_at as string).toISOString();
         delete data.registered_at;

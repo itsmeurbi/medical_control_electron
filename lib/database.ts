@@ -89,8 +89,21 @@ export const patientQueries = {
 
   update: async (id: number, patient: Partial<Record<string, unknown>>) => {
     // Remove relation fields and computed fields that shouldn't be updated
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { _treatments, _age, _medical_record, ...patientData } = patient as Record<string, unknown>;
+    const {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _treatments,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _age,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      _medical_record,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      treatments,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      age,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      medical_record,
+      ...patientData
+    } = patient as Record<string, unknown>;
 
     const data = cleanData({
       ...patientData,
