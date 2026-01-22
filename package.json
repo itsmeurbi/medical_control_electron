@@ -8,6 +8,8 @@
     "dev:next": "next dev",
     "dev:electron": "wait-on http://localhost:3000 && electron .",
     "build": "next build",
+    "build:electron": "npm run build && electron-builder",
+    "build:mac": "npm run build && electron-builder --mac",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
@@ -39,5 +41,35 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "wait-on": "^7.2.0"
+  },
+  "build": {
+    "appId": "com.medicalcontrol.app",
+    "productName": "Medical Control",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main/**/*",
+      ".next/standalone/**/*",
+      ".next/static/**/*",
+      "public/**/*",
+      "database/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.medical",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        }
+      ]
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

@@ -1,8 +1,10 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const http = require('http');
+const { spawn } = require('child_process');
 
 let mainWindow;
+let nextServer;
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -62,7 +64,7 @@ function createWindow() {
 
   const startUrl = isDev
     ? 'http://localhost:3000'
-    : `file://${path.join(__dirname, '../out/index.html')}`;
+    : 'http://localhost:3000';
 
   if (isDev) {
     waitForServer(startUrl)
@@ -75,7 +77,39 @@ function createWindow() {
         mainWindow.loadURL(startUrl); // Try anyway
       });
   } else {
-    mainWindow.loadURL(startUrl);
+    // Start Next.js server in production
+    const nextPath = path.join(__dirname, '../.next/standalone');
+    const serverPath = path.join(nextPath, 'server.js');
+
+    // Set PORT environment variable
+    process.env.PORT = '3000';
+
+    // Start the Next.js server
+    nextServer = spawn(process.execPath, [serverPath], {
+      cwd: nextPath,
+      env: {
+        ...process.env,
+        PORT: '3000',
+        NODE_ENV: 'production'
+      }
+    });
+
+    nextServer.stdout.on('data', (data) => {
+      console.log(`Next.js: ${data}`);
+    });
+
+    nextServer.stderr.on('data', (data) => {
+      console.error(`Next.js error: ${data}`);
+    });
+
+    // Wait for server to start
+    waitForServer(startUrl)
+      .then(() => {
+        mainWindow.loadURL(startUrl);
+      })
+      .catch((err) => {
+        console.error('Failed to start Next.js server:', err);
+      });
   }
 
   mainWindow.on('closed', () => {
@@ -96,5 +130,12 @@ app.whenReady().then(() => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+app.on('before-quit', () => {
+  // Kill Next.js server on app quit
+  if (nextServer) {
+    nextServer.kill();
   }
 });

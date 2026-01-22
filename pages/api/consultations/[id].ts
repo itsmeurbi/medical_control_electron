@@ -28,7 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const data: Record<string, unknown> = { ...req.body };
-      if (data.date) {
+      if (data.date && typeof data.date === 'string') {
         data.date = new Date(data.date).toISOString();
       }
 

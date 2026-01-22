@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import { Patient, Gender, MaritalStatus, Evera, BloodType, RhFactor, Consultation } from '@/lib/types';
 import { calculateAge } from '@/lib/utils';
-import { useRouter } from 'next/router';
 
 interface PatientFormProps {
-  formData: Partial<Patient>;
+  formData?: Partial<Patient>;
   setFormData: (data: Partial<Patient>) => void;
-  errors: Record<string, string>;
-  loading: boolean;
+  errors?: Record<string, string>;
+  loading?: boolean;
   onSubmit: (e: React.FormEvent, treatment?: { date: string; procedure: string; meds: string }) => void;
   submitLabel: string;
   isEdit?: boolean;
@@ -28,10 +27,10 @@ interface PatientFormProps {
 }
 
 export default function PatientForm({
-  formData,
+  formData = {},
   setFormData,
-  errors,
-  loading,
+  errors = {},
+  loading = false,
   onSubmit,
   submitLabel,
   isEdit = false,
@@ -44,9 +43,8 @@ export default function PatientForm({
   onTreatmentAdd,
   onTreatmentPageChange,
 }: PatientFormProps) {
-  const router = useRouter();
   const [age, setAge] = useState<number | null>(
-    formData.birthDate ? calculateAge(formData.birthDate) : null
+    formData?.birthDate ? calculateAge(formData.birthDate) : null
   );
   const [activeTab, setActiveTab] = useState('pain-form');
 
@@ -1073,13 +1071,6 @@ export default function PatientForm({
       </div>
 
       <div className="mt-4 flex justify-between items-center">
-        <button
-          type="button"
-          onClick={() => router.push('/')}
-          className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-4 rounded border"
-        >
-          Regresar
-        </button>
         <div className="flex">
           <button
             type="submit"
