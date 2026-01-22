@@ -342,16 +342,6 @@ export default function EditPatient() {
           </div>
         </div>
       )}
-
-      <div className="mt-4 flex justify-end">
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-4 rounded border"
-            >
-              Regresar
-            </button>
-          </div>
     </div>
   );
 }

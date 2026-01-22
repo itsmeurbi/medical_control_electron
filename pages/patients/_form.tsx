@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Patient, Gender, MaritalStatus, Evera, BloodType, RhFactor, Consultation } from '@/lib/types';
 import { calculateAge } from '@/lib/utils';
+import { useRouter } from 'next/router';
 
 interface PatientFormProps {
   formData: Partial<Patient>;
@@ -43,6 +44,7 @@ export default function PatientForm({
   onTreatmentAdd,
   onTreatmentPageChange,
 }: PatientFormProps) {
+  const router = useRouter();
   const [age, setAge] = useState<number | null>(
     formData.birthDate ? calculateAge(formData.birthDate) : null
   );
@@ -1047,6 +1049,13 @@ export default function PatientForm({
       </div>
 
       <div className="mt-4 flex justify-between items-center">
+        <button
+          type="button"
+          onClick={() => router.push('/')}
+          className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-4 rounded border"
+        >
+          Regresar
+        </button>
         <div className="flex">
           <button
             type="submit"
