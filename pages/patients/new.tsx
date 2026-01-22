@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Patient } from '@/lib/types';
-import PatientForm from './_form';
+import PatientForm from '@/components/patients/PatientForm';
 
 export default function NewPatient() {
   const router = useRouter();

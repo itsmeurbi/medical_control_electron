@@ -5,10 +5,10 @@ import { Patient, Gender, MaritalStatus, Evera, BloodType, RhFactor, Consultatio
 import { calculateAge } from '@/lib/utils';
 
 interface PatientFormProps {
-  formData: Partial<Patient>;
+  formData?: Partial<Patient>;
   setFormData: (data: Partial<Patient>) => void;
-  errors: Record<string, string>;
-  loading: boolean;
+  errors?: Record<string, string>;
+  loading?: boolean;
   onSubmit: (e: React.FormEvent, treatment?: { date: string; procedure: string; meds: string }) => void;
   submitLabel: string;
   isEdit?: boolean;
@@ -28,10 +28,10 @@ interface PatientFormProps {
 }
 
 export default function PatientForm({
-  formData,
+  formData = {},
   setFormData,
-  errors,
-  loading,
+  errors = {},
+  loading = false,
   onSubmit,
   submitLabel,
   isEdit = false,
@@ -45,14 +45,17 @@ export default function PatientForm({
   onTreatmentPageChange,
   onCancel,
 }: PatientFormProps) {
+  // Ensure formData always has a value to prevent SSR errors
+  const safeFormData = formData || {};
+
   const [age, setAge] = useState<number | null>(
-    formData.birthDate ? calculateAge(formData.birthDate) : null
+    safeFormData?.birthDate ? calculateAge(safeFormData.birthDate) : null
   );
   const [activeTab, setActiveTab] = useState('pain-form');
 
   const handleBirthDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const date = e.target.value;
-    setFormData({ ...formData, birthDate: date });
+    setFormData({ ...safeFormData, birthDate: date });
     if (date) {
       const calculatedAge = calculateAge(date);
       setAge(calculatedAge);
@@ -76,7 +79,7 @@ export default function PatientForm({
             <input
               type="text"
               required
-              value={formData.name || ''}
+              value={safeFormData.name || ''}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className={`w-full rounded p-2 text-gray-900 border ${
                 errors.name ? 'border-red-500' : 'border-gray-300'
@@ -90,7 +93,7 @@ export default function PatientForm({
               <label className="block mb-1">Exp:</label>
               <input
                 type="text"
-                value={formData.medicalRecord || ''}
+                value={safeFormData.medicalRecord || ''}
                 disabled
                 readOnly
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 bg-gray-100"
@@ -101,7 +104,7 @@ export default function PatientForm({
               <input
                 type="date"
                 required
-                value={formData.registeredAt || ''}
+                value={safeFormData.registeredAt || ''}
                 onChange={(e) => setFormData({ ...formData, registeredAt: e.target.value })}
                 className={`w-full rounded p-2 text-gray-900 border ${
                   errors.registeredAt ? 'border-red-500' : 'border-gray-300'
@@ -118,7 +121,7 @@ export default function PatientForm({
               <label className="block mb-1">F. Nac:</label>
               <input
                 type="date"
-                value={formData.birthDate || ''}
+                value={safeFormData.birthDate || ''}
                 onChange={handleBirthDateChange}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -137,7 +140,7 @@ export default function PatientForm({
               <label className="block mb-1">Sexo:</label>
               <select
                 required
-                value={formData.gender ?? ''}
+                value={safeFormData.gender ?? ''}
                 onChange={(e) =>
                   setFormData({ ...formData, gender: parseInt(e.target.value) as Gender })
                 }
@@ -154,7 +157,7 @@ export default function PatientForm({
             <div className="flex flex-col justify-end">
               <label className="block mb-1">E. Civil:</label>
               <select
-                value={formData.maritalStatus ?? ''}
+                value={safeFormData.maritalStatus ?? ''}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -179,7 +182,7 @@ export default function PatientForm({
                 <label className="block mb-1">Referencia:</label>
                 <input
                   type="text"
-                  value={formData.reference || ''}
+                  value={safeFormData.reference || ''}
                   onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -187,7 +190,7 @@ export default function PatientForm({
               <div className="w-full">
                 <label className="block mb-1">S. Fiscal/Fact:</label>
                 <textarea
-                  value={formData.fiscalSituation || ''}
+                  value={safeFormData.fiscalSituation || ''}
                   onChange={(e) => setFormData({ ...formData, fiscalSituation: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -198,7 +201,7 @@ export default function PatientForm({
               <div className="w-full">
                 <label className="block mb-1">Ocupación:</label>
                 <textarea
-                  value={formData.occupations || ''}
+                  value={safeFormData.occupations || ''}
                   onChange={(e) => setFormData({ ...formData, occupations: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -213,7 +216,7 @@ export default function PatientForm({
           <div className="w-full flex flex-col">
             <label className="font-bold text-red-600 mb-1">ALERGIAS:</label>
             <textarea
-              value={formData.alergies || ''}
+              value={safeFormData.alergies || ''}
               onChange={(e) => setFormData({ ...formData, alergies: e.target.value })}
               className="w-full rounded p-2 text-red-600 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               rows={1}
@@ -222,7 +225,7 @@ export default function PatientForm({
           <div className="w-full flex flex-col">
             <label className="font-bold text-red-600 mb-1">ANTICOAGULANTES:</label>
             <textarea
-              value={formData.anticoagulants || ''}
+              value={safeFormData.anticoagulants || ''}
               onChange={(e) => setFormData({ ...formData, anticoagulants: e.target.value })}
               className="w-full rounded p-2 text-red-600 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               rows={1}
@@ -237,7 +240,7 @@ export default function PatientForm({
                 </svg>
                 <input
                   type="text"
-                  value={formData.cellphoneNumber || ''}
+                  value={safeFormData.cellphoneNumber || ''}
                   onChange={(e) => setFormData({ ...formData, cellphoneNumber: e.target.value })}
                   className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -251,7 +254,7 @@ export default function PatientForm({
                 </svg>
                 <input
                   type="text"
-                  value={formData.cellphoneNumberTwo || ''}
+                  value={safeFormData.cellphoneNumberTwo || ''}
                   onChange={(e) => setFormData({ ...formData, cellphoneNumberTwo: e.target.value })}
                   className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -265,7 +268,7 @@ export default function PatientForm({
                 </svg>
                 <input
                   type="text"
-                  value={formData.cellphoneNumberThree || ''}
+                  value={safeFormData.cellphoneNumberThree || ''}
                   onChange={(e) => setFormData({ ...formData, cellphoneNumberThree: e.target.value })}
                   className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -278,7 +281,7 @@ export default function PatientForm({
                 </svg>
                 <input
                   type="text"
-                  value={formData.phoneNumber || ''}
+                  value={safeFormData.phoneNumber || ''}
                   onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
                   className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -292,7 +295,7 @@ export default function PatientForm({
                 </svg>
                 <input
                   type="email"
-                  value={formData.email || ''}
+                  value={safeFormData.email || ''}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full rounded p-2 mt-1 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -304,7 +307,7 @@ export default function PatientForm({
               <div className="w-full col-span-5">
                 <label className="block mb-1">Domicilio:</label>
                 <textarea
-                  value={formData.address || ''}
+                  value={safeFormData.address || ''}
                   onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -314,7 +317,7 @@ export default function PatientForm({
                 <label className="block mb-1">Ciudad:</label>
                 <input
                   type="text"
-                  value={formData.city || ''}
+                  value={safeFormData.city || ''}
                   onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -324,7 +327,7 @@ export default function PatientForm({
               <div className="w-full">
                 <label className="block mb-1">Tx. Intervencionismo:</label>
                 <textarea
-                  value={formData.interventionismTx || ''}
+                  value={safeFormData.interventionismTx || ''}
                   onChange={(e) => setFormData({ ...formData, interventionismTx: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -339,7 +342,7 @@ export default function PatientForm({
           <div className="w-full flex flex-col">
             <label className="block mb-1">Crónicos/Degenerativas:</label>
             <textarea
-              value={formData.chronics || ''}
+              value={safeFormData.chronics || ''}
               onChange={(e) => setFormData({ ...formData, chronics: e.target.value })}
               className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               rows={1}
@@ -348,7 +351,7 @@ export default function PatientForm({
           <div className="w-full flex flex-col">
             <label className="block mb-1">DX. A. Inicial:</label>
             <textarea
-              value={formData.initialDx || ''}
+              value={safeFormData.initialDx || ''}
               onChange={(e) => setFormData({ ...formData, initialDx: e.target.value })}
               className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               rows={1}
@@ -357,7 +360,7 @@ export default function PatientForm({
           <div className="w-full flex flex-col justify-end">
             <label className="block mb-1">DX. A. Final:</label>
             <textarea
-              value={formData.finalDx || ''}
+              value={safeFormData.finalDx || ''}
               onChange={(e) => setFormData({ ...formData, finalDx: e.target.value })}
               className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               rows={1}
@@ -366,7 +369,7 @@ export default function PatientForm({
           <div className="w-full flex flex-col">
             <label className="block mb-1">Antecedentes:</label>
             <textarea
-              value={formData.medicalBackground || ''}
+              value={safeFormData.medicalBackground || ''}
               onChange={(e) => setFormData({ ...formData, medicalBackground: e.target.value })}
               className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               rows={1}
@@ -375,7 +378,7 @@ export default function PatientForm({
           <div className="w-full flex flex-col">
             <label className="block mb-1">QX:</label>
             <textarea
-              value={formData.surgicalBackground || ''}
+              value={safeFormData.surgicalBackground || ''}
               onChange={(e) => setFormData({ ...formData, surgicalBackground: e.target.value })}
               className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               rows={1}
@@ -450,7 +453,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col">
                 <label className="block mb-1">Inicio:</label>
                 <textarea
-                  value={formData.painInitialState || ''}
+                  value={safeFormData.painInitialState || ''}
                   onChange={(e) => setFormData({ ...formData, painInitialState: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -459,7 +462,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col">
                 <label className="block mb-1">Tipo:</label>
                 <textarea
-                  value={formData.painType || ''}
+                  value={safeFormData.painType || ''}
                   onChange={(e) => setFormData({ ...formData, painType: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -468,7 +471,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col">
                 <label className="block mb-1">Irradiaciones:</label>
                 <textarea
-                  value={formData.irradiations || ''}
+                  value={safeFormData.irradiations || ''}
                   onChange={(e) => setFormData({ ...formData, irradiations: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -478,7 +481,7 @@ export default function PatientForm({
                 <div>
                   <label className="block mb-1">EVA:</label>
                   <select
-                    value={formData.evaluation ?? ''}
+                    value={safeFormData.evaluation ?? ''}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -498,7 +501,7 @@ export default function PatientForm({
                 <div>
                   <label className="block mb-1">EVERA:</label>
                   <select
-                    value={formData.evera ?? ''}
+                    value={safeFormData.evera ?? ''}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
@@ -519,7 +522,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col pt-2">
                 <label className="block mb-1">Evolución:</label>
                 <textarea
-                  value={formData.painEvolution || ''}
+                  value={safeFormData.painEvolution || ''}
                   onChange={(e) => setFormData({ ...formData, painEvolution: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -528,7 +531,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col pt-2">
                 <label className="block mb-1">Duración:</label>
                 <textarea
-                  value={formData.painDuration || ''}
+                  value={safeFormData.painDuration || ''}
                   onChange={(e) => setFormData({ ...formData, painDuration: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -542,7 +545,7 @@ export default function PatientForm({
                 </label>
                 <input
                   type="text"
-                  value={formData.increasesWith || ''}
+                  value={safeFormData.increasesWith || ''}
                   onChange={(e) => setFormData({ ...formData, increasesWith: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -550,7 +553,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col pt-2">
                 <label className="block mb-1">TX. Previo:</label>
                 <textarea
-                  value={formData.previousTx || ''}
+                  value={safeFormData.previousTx || ''}
                   onChange={(e) => setFormData({ ...formData, previousTx: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -561,7 +564,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col pt-2">
                 <label className="block mb-1">Estado actual:</label>
                 <textarea
-                  value={formData.painCurrentState || ''}
+                  value={safeFormData.painCurrentState || ''}
                   onChange={(e) => setFormData({ ...formData, painCurrentState: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -570,7 +573,7 @@ export default function PatientForm({
               <div className="w-full flex flex-col pt-2">
                 <label className="block mb-1">Localización:</label>
                 <textarea
-                  value={formData.painLocalization || ''}
+                  value={safeFormData.painLocalization || ''}
                   onChange={(e) => setFormData({ ...formData, painLocalization: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   rows={1}
@@ -584,7 +587,7 @@ export default function PatientForm({
                 </label>
                 <input
                   type="text"
-                  value={formData.decreasesWith || ''}
+                  value={safeFormData.decreasesWith || ''}
                   onChange={(e) => setFormData({ ...formData, decreasesWith: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -600,7 +603,7 @@ export default function PatientForm({
               <div className="w-full">
                 <label className="block mb-1">Gpo:</label>
                 <select
-                  value={formData.bloodType ?? ''}
+                  value={safeFormData.bloodType ?? ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -619,7 +622,7 @@ export default function PatientForm({
               <div>
                 <label className="block mb-1">Rh:</label>
                 <select
-                  value={formData.rhFactor ?? ''}
+                  value={safeFormData.rhFactor ?? ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -637,7 +640,7 @@ export default function PatientForm({
             <div className="w-full">
               <label className="block mb-1">Cabeza:</label>
               <textarea
-                value={formData.head || ''}
+                value={safeFormData.head || ''}
                 onChange={(e) => setFormData({ ...formData, head: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 rows={1}
@@ -646,7 +649,7 @@ export default function PatientForm({
             <div className="w-full">
               <label className="block mb-1">Abdomen:</label>
               <textarea
-                value={formData.abdomen || ''}
+                value={safeFormData.abdomen || ''}
                 onChange={(e) => setFormData({ ...formData, abdomen: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 rows={1}
@@ -657,7 +660,7 @@ export default function PatientForm({
                 <label className="block mb-1">Peso(Kg):</label>
                 <input
                   type="number"
-                  value={formData.weight || ''}
+                  value={safeFormData.weight || ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -671,7 +674,7 @@ export default function PatientForm({
                 <label className="block mb-1">Talla(cm):</label>
                 <input
                   type="number"
-                  value={formData.height || ''}
+                  value={safeFormData.height || ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -685,7 +688,7 @@ export default function PatientForm({
             <div className="w-full pt-2">
               <label className="block mb-1">Cuello:</label>
               <textarea
-                value={formData.neck || ''}
+                value={safeFormData.neck || ''}
                 onChange={(e) => setFormData({ ...formData, neck: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 rows={1}
@@ -694,7 +697,7 @@ export default function PatientForm({
             <div className="w-full pt-2">
               <label className="block mb-1">Columna:</label>
               <textarea
-                value={formData.spine || ''}
+                value={safeFormData.spine || ''}
                 onChange={(e) => setFormData({ ...formData, spine: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 rows={1}
@@ -705,7 +708,7 @@ export default function PatientForm({
                 <label className="block mb-1">TA:</label>
                 <input
                   type="text"
-                  value={formData.bloodPressure || ''}
+                  value={safeFormData.bloodPressure || ''}
                   onChange={(e) => setFormData({ ...formData, bloodPressure: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -714,7 +717,7 @@ export default function PatientForm({
                 <label className="block mb-1">FC:</label>
                 <input
                   type="number"
-                  value={formData.heartRate || ''}
+                  value={safeFormData.heartRate || ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -728,7 +731,7 @@ export default function PatientForm({
                 <label className="block mb-1">FR:</label>
                 <input
                   type="number"
-                  value={formData.breathRate || ''}
+                  value={safeFormData.breathRate || ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -742,7 +745,7 @@ export default function PatientForm({
                 <label className="block mb-1">SPO2:</label>
                 <input
                   type="text"
-                  value={formData.spo2 || ''}
+                  value={safeFormData.spo2 || ''}
                   onChange={(e) => setFormData({ ...formData, spo2: e.target.value })}
                   className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 />
@@ -751,7 +754,7 @@ export default function PatientForm({
             <div className="w-full pt-2">
               <label className="block mb-1">Tórax:</label>
               <textarea
-                value={formData.chest || ''}
+                value={safeFormData.chest || ''}
                 onChange={(e) => setFormData({ ...formData, chest: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 rows={1}
@@ -760,7 +763,7 @@ export default function PatientForm({
             <div className="w-full pt-2">
               <label className="block mb-1">Extremidades:</label>
               <textarea
-                value={formData.extremities || ''}
+                value={safeFormData.extremities || ''}
                 onChange={(e) => setFormData({ ...formData, extremities: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 rows={1}
@@ -775,7 +778,7 @@ export default function PatientForm({
             <div>
               <label className="block mb-1">Laboratorio:</label>
               <textarea
-                value={formData.laboratory || ''}
+                value={safeFormData.laboratory || ''}
                 onChange={(e) => setFormData({ ...formData, laboratory: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -787,7 +790,7 @@ export default function PatientForm({
                   <label className="block mb-1">Rx:</label>
                   <input
                     type="checkbox"
-                    checked={formData.rx || false}
+                    checked={safeFormData.rx || false}
                     onChange={(e) => setFormData({ ...formData, rx: e.target.checked })}
                     className="rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -796,7 +799,7 @@ export default function PatientForm({
                   <label className="block mb-1">TAC:</label>
                   <input
                     type="checkbox"
-                    checked={formData.cat || false}
+                    checked={safeFormData.cat || false}
                     onChange={(e) => setFormData({ ...formData, cat: e.target.checked })}
                     className="rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -805,7 +808,7 @@ export default function PatientForm({
                   <label className="block mb-1">IRM:</label>
                   <input
                     type="checkbox"
-                    checked={formData.mri || false}
+                    checked={safeFormData.mri || false}
                     onChange={(e) => setFormData({ ...formData, mri: e.target.checked })}
                     className="rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -814,7 +817,7 @@ export default function PatientForm({
                   <label className="block mb-1">US:</label>
                   <input
                     type="checkbox"
-                    checked={formData.us || false}
+                    checked={safeFormData.us || false}
                     onChange={(e) => setFormData({ ...formData, us: e.target.checked })}
                     className="rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -823,7 +826,7 @@ export default function PatientForm({
                   <label className="block mb-1">DO:</label>
                   <input
                     type="checkbox"
-                    checked={formData.do || false}
+                    checked={safeFormData.do || false}
                     onChange={(e) => setFormData({ ...formData, do: e.target.checked })}
                     className="rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -832,7 +835,7 @@ export default function PatientForm({
                   <label className="block mb-1">EMG:</label>
                   <input
                     type="checkbox"
-                    checked={formData.emg || false}
+                    checked={safeFormData.emg || false}
                     onChange={(e) => setFormData({ ...formData, emg: e.target.checked })}
                     className="rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                   />
@@ -842,7 +845,7 @@ export default function PatientForm({
             <div className="pt-2">
               <label className="block mb-1">Gabinete:</label>
               <textarea
-                value={formData.cabinet || ''}
+                value={safeFormData.cabinet || ''}
                 onChange={(e) => setFormData({ ...formData, cabinet: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -850,7 +853,7 @@ export default function PatientForm({
             <div className="pt-2">
               <label className="block mb-1">Interconsultas:</label>
               <textarea
-                value={formData.consultations || ''}
+                value={safeFormData.consultations || ''}
                 onChange={(e) => setFormData({ ...formData, consultations: e.target.value })}
                 className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               />
