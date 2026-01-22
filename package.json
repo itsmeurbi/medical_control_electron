@@ -29,6 +29,7 @@
     "react-dom": "19.2.3"
   },
   "devDependencies": {
+    "@electron/rebuild": "^3.7.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -44,11 +45,20 @@
     "wait-on": "^7.2.0"
   },
   "build": {
+    "asar": true,
+    "asarUnpack": [
+      ".next/standalone/**",
+      ".next/static/**",
+      "prisma/**",
+      "database/**"
+    ],
     "appId": "com.medicalcontrol.app",
     "productName": "Medical Control",
     "directories": {
       "output": "dist"
     },
+    "npmRebuild": false,
+    "buildDependenciesFromSource": true,
     "files": [
       "main/**/*",
       "lib/**/*",

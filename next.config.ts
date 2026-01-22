@@ -1,13 +1,13 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  reactStrictMode: true,
-  // Disable image optimization for Electron
-  images: {
-    unoptimized: true
-  },
-  // Output standalone for Electron packaging
   output: 'standalone',
+  images: {
+    unoptimized: true,
+  },
+  turbopack: {
+    root: __dirname,
+  },
 };
 
 export default nextConfig;
