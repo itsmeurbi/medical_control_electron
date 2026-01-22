@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Patient {
+  id                   Int            @id @default(autoincrement())
+  name                 String
+  birthDate            String?        @map("birth_date")
+  city                 String?
+  address              String?
+  phoneNumber          String?        @map("phone_number")
+  medicalRecord        String?        @map("medical_record")
+  registeredAt         String         @map("registered_at")
+  gender               Int
+  maritalStatus        Int?           @map("marital_status")
+  reference            String?
+  occupations          String?
+  primaryDx            String?        @map("primary_dx")
+  initialDx            String?        @map("initial_dx")
+  finalDx              String?        @map("final_dx")
+  medicalBackground    String?        @map("medical_background")
+  surgicalBackground   String?        @map("surgical_background")
+  interventionismTx    String?        @map("interventionism_tx")
+  painType             String?        @map("pain_type")
+  painLocalization     String?        @map("pain_localization")
+  painEvolution        String?        @map("pain_evolution")
+  painDuration         String?        @map("pain_duration")
+  painInitialState     String?        @map("pain_initial_state")
+  painCurrentState     String?        @map("pain_current_state")
+  alergies             String?
+  irradiations         String?
+  evaluation           Int?
+  evera                Int?
+  previousTx           String?        @map("previous_tx")
+  bloodType            Int?           @map("blood_type")
+  rhFactor             Int?           @map("rh_factor")
+  weight               Float?
+  height               Float?
+  bloodPressure        String?        @map("blood_pressure")
+  heartRate            Int?           @map("heart_rate")
+  breathRate           Int?           @map("breath_rate")
+  generalInspection    String?        @map("general_inspection")
+  head                 String?
+  abdomen              String?
+  neck                 String?
+  extremities          String?
+  spine                String?
+  chest                String?
+  laboratory           String?
+  cabinet              String?
+  consultations        String?
+  requestedStudies     String?        @map("requested_studies")
+  createdAt            String         @default("datetime('now')") @map("created_at")
+  updatedAt            String         @default("datetime('now')") @map("updated_at")
+  anticoagulants       String?
+  cellphoneNumber      String?        @map("cellphone_number")
+  chronics             String?
+  fiscalSituation      String?        @map("fiscal_situation")
+  email                String?
+  zipCode              String?        @map("zip_code")
+  rx                   Int?           @default(0)
+  cat                  Int?           @default(0)
+  mri                  Int?           @default(0)
+  us                   Int?           @default(0)
+  do                   Int?           @default(0)
+  emg                  Int?           @default(0)
+  spo2                 String?
+  increasesWith        String?        @map("increases_with")
+  decreasesWith        String?        @map("decreases_with")
+  cellphoneNumberTwo   String?        @map("cellphone_number_two")
+  cellphoneNumberThree String?        @map("cellphone_number_three")
+  treatments           Consultation[]
+
+  @@map("patients")
+}
+
+model Consultation {
+  id        Int     @id @default(autoincrement())
+  patientId Int     @map("patient_id")
+  procedure String?
+  meds      String?
+  date      String
+  createdAt String  @default("datetime('now')") @map("created_at")
+  updatedAt String  @default("datetime('now')") @map("updated_at")
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([patientId], map: "index_consultations_on_patient_id")
+  @@map("consultations")
+}

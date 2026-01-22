@@ -1,40 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Medical Control Electron App
 
-## Getting Started
+Desktop application for medical patient management, built with Electron + Next.js + TypeScript + SQLite.
 
-First, run the development server:
+## Setup
 
+1. Install dependencies:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Run the development server:
+```bash
+npm run dev
+```
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+This will:
+- Start the Next.js dev server on http://localhost:3000
+- Launch the Electron app window
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+## Available Scripts
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+- `npm run dev` - Start both Next.js and Electron in development mode
+- `npm run dev:next` - Start only Next.js dev server
+- `npm run dev:electron` - Start only Electron (waits for Next.js)
+- `npm run build` - Build Next.js for production
+- `npm run package` - Package the app for distribution
+- `npm run package:mac` - Package specifically for macOS
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+- `main/` - Electron main process files
+- `pages/` - Next.js pages (Pages Router)
+- `pages/api/` - API routes
+- `lib/` - Shared utilities (database, types)
+- `database/` - SQLite database file (created automatically)
 
-To learn more about Next.js, take a look at the following resources:
+## Database
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+The app uses SQLite stored in `database/medical_control.db`. The database is automatically created and initialized on first run.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Features
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+- Patient management (CRUD)
+- Consultation/treatment tracking
+- CSV export
+- Search functionality
+- Advanced search
