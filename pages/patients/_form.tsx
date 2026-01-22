@@ -146,8 +146,8 @@ export default function PatientForm({
                 } focus:ring-blue-500 focus:border-blue-500`}
               >
                 <option value=""></option>
-                <option value={Gender.Masculino}>Masculino</option>
-                <option value={Gender.Femenino}>Femenino</option>
+                <option value={Gender.Masculino}>M</option>
+                <option value={Gender.Femenino}>F</option>
               </select>
               {errors.gender && <p className="text-red-500 text-sm mt-1">{errors.gender}</p>}
             </div>
@@ -164,11 +164,11 @@ export default function PatientForm({
                 className="w-full rounded p-2 h-[42px] text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value=""></option>
-                <option value={MaritalStatus.Casado}>Casado</option>
-                <option value={MaritalStatus.Divorciado}>Divorciado</option>
-                <option value={MaritalStatus.Soltero}>Soltero</option>
-                <option value={MaritalStatus.UnionLibre}>Unión Libre</option>
-                <option value={MaritalStatus.Viudo}>Viudo</option>
+                <option value={MaritalStatus.Casado}>C</option>
+                <option value={MaritalStatus.Divorciado}>D</option>
+                <option value={MaritalStatus.Soltero}>S</option>
+                <option value={MaritalStatus.UnionLibre}>U</option>
+                <option value={MaritalStatus.Viudo}>V</option>
               </select>
             </div>
           </div>
