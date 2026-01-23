@@ -1,6 +1,6 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
-const { spawn } = require('child_process');
+const { fork } = require('child_process');
 const net = require('net');
 const fs = require('fs');
 
@@ -33,43 +33,6 @@ function waitForPort(port, timeout = 15000) {
   });
 }
 
-// Ensure static files are accessible to standalone server
-function ensureStaticFiles() {
-  if (!app.isPackaged) return;
-
-  const projectRoot = path.join(process.resourcesPath, 'app.asar.unpacked');
-  const staticSource = path.join(projectRoot, '.next', 'static');
-  const staticTarget = path.join(projectRoot, '.next', 'standalone', '.next', 'static');
-
-  try {
-    // Check if target already exists
-    if (fs.existsSync(staticTarget)) {
-      const stats = fs.lstatSync(staticTarget);
-      // If it's a symlink, remove it and copy instead
-      if (stats.isSymbolicLink()) {
-        fs.unlinkSync(staticTarget);
-      } else {
-        // Already a directory, assume it's correct
-        return;
-      }
-    }
-
-    // Ensure parent directory exists
-    const parentDir = path.dirname(staticTarget);
-    if (!fs.existsSync(parentDir)) {
-      fs.mkdirSync(parentDir, { recursive: true });
-    }
-
-    // Copy static files if source exists
-    if (fs.existsSync(staticSource)) {
-      // Use a simple copy approach - in production you might want to use a more robust method
-      fs.cpSync(staticSource, staticTarget, { recursive: true });
-    }
-  } catch (err) {
-    console.error('Failed to ensure static files:', err);
-  }
-}
-
 // Start Next standalone (only in production)
 function startNextStandalone() {
   if (!app.isPackaged) {
@@ -77,40 +40,47 @@ function startNextStandalone() {
     return;
   }
 
-  // Ensure static files are accessible
-  ensureStaticFiles();
+  const projectRoot = path.join(process.resourcesPath, 'app.asar.unpacked');
+  const staticSource = path.join(projectRoot, '.next', 'static');
+  const staticTarget = path.join(projectRoot, '.next', 'standalone', '.next', 'static');
 
-  // Project root where .next directory is located
-  const projectRoot = path.join(
-    process.resourcesPath,
-    'app.asar.unpacked'
-  );
+  // Ensure static files are accessible (copy if target doesn't exist)
+  // This is essential for CSS and other static assets to load in production
+  if (!fs.existsSync(staticTarget) && fs.existsSync(staticSource)) {
+    fs.mkdirSync(path.dirname(staticTarget), { recursive: true });
+    fs.cpSync(staticSource, staticTarget, { recursive: true });
+  }
 
-  const serverPath = path.join(
-    projectRoot,
-    '.next',
-    'standalone',
-    'server.js'
-  );
+  const serverPath = path.join(projectRoot, '.next', 'standalone', 'server.js');
 
-  nextProcess = spawn(
-    process.execPath,
-    [serverPath],
-    {
-      // Run from project root so Next.js can find static files
-      cwd: projectRoot,
-      stdio: 'inherit',
-      env: {
-        ...process.env,
-        NODE_ENV: 'production',
-        PORT: '3000',
-        ELECTRON_RUN_AS_NODE: '1'
-      }
-    }
-  );
+  const env = {
+    ...process.env,
+    NODE_ENV: 'production',
+    PORT: '3000',
+    ELECTRON_RUN_AS_NODE: '1'
+  };
+
+  // Use fork instead of spawn - runs as Node.js child process, not new Electron instance
+  // This prevents a second dock icon from appearing on macOS
+  nextProcess = fork(serverPath, [], {
+    cwd: projectRoot,
+    silent: false, // Enable logging
+    env
+  });
+
+  // Capture and display Next.js server logs
+  nextProcess.stdout?.on('data', (data) => {
+    console.log(`[Next.js] ${data.toString()}`);
+  });
+
+  nextProcess.stderr?.on('data', (data) => {
+    console.error(`[Next.js Error] ${data.toString()}`);
+  });
 
   nextProcess.on('exit', (code) => {
-    console.log(`Next standalone server exited with code ${code}`);
+    if (code !== 0 && code !== null) {
+      console.error(`Next standalone server exited with code ${code}`);
+    }
   });
 }
 

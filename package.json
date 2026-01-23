@@ -9,8 +9,9 @@
     "dev:electron": "wait-on http://localhost:3000 && electron .",
     "dev:prod": "npm run build && NODE_ENV=production electron .",
     "build": "next build",
-    "build:electron": "next build && electron-builder",
-    "build:mac": "next build && electron-builder --mac",
+    "postbuild": "npx @electron/rebuild -f -w better-sqlite3 -p .next/standalone/node_modules -v $(node -p \"require('electron/package.json').version\")",
+    "build:electron": "next build && npm run postbuild && electron-builder",
+    "build:mac": "next build && npm run postbuild && electron-builder --mac",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
@@ -57,7 +58,7 @@
     "directories": {
       "output": "dist"
     },
-    "npmRebuild": false,
+    "npmRebuild": true,
     "buildDependenciesFromSource": true,
     "files": [
       "main/**/*",
