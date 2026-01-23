@@ -110,6 +110,11 @@ async function createWindow() {
     }
 
     mainWindow.show();
+
+    // Open DevTools in dev mode
+    if (!app.isPackaged) {
+      mainWindow.webContents.openDevTools();
+    }
   } catch (err) {
     console.error('Failed to load URL:', err);
   }
