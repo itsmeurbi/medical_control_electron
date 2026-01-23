@@ -291,7 +291,7 @@ export default function EditPatient() {
                   <form onSubmit={handleConsultationUpdate} className="flex flex-col w-full">
                     <div className="w-full block">
                       <div>
-                        <label className="block mb-1">F. del tratamiento:</label>
+                        <label className="block mb-1 text-gray-900">F. del tratamiento:</label>
             </div>
                   <input
                         type="date"
@@ -301,7 +301,7 @@ export default function EditPatient() {
                   />
                 </div>
                     <div className="w-full mt-2">
-                      <label className="block mb-1">Procedimiento:</label>
+                      <label className="block mb-1 text-gray-900">Procedimiento:</label>
                   <textarea
                         name="procedure"
                         defaultValue={editingConsultation.procedure || ''}
@@ -310,7 +310,7 @@ export default function EditPatient() {
                   />
                 </div>
                     <div className="w-full mt-2">
-                      <label className="block mb-1">Medicamentos:</label>
+                      <label className="block mb-1 text-gray-900">Medicamentos:</label>
                   <textarea
                         name="meds"
                         defaultValue={editingConsultation.meds || ''}
