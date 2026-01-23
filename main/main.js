@@ -2,6 +2,7 @@ const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const net = require('net');
+const fs = require('fs');
 
 let nextProcess;
 
@@ -32,6 +33,43 @@ function waitForPort(port, timeout = 15000) {
   });
 }
 
+// Ensure static files are accessible to standalone server
+function ensureStaticFiles() {
+  if (!app.isPackaged) return;
+
+  const projectRoot = path.join(process.resourcesPath, 'app.asar.unpacked');
+  const staticSource = path.join(projectRoot, '.next', 'static');
+  const staticTarget = path.join(projectRoot, '.next', 'standalone', '.next', 'static');
+
+  try {
+    // Check if target already exists
+    if (fs.existsSync(staticTarget)) {
+      const stats = fs.lstatSync(staticTarget);
+      // If it's a symlink, remove it and copy instead
+      if (stats.isSymbolicLink()) {
+        fs.unlinkSync(staticTarget);
+      } else {
+        // Already a directory, assume it's correct
+        return;
+      }
+    }
+
+    // Ensure parent directory exists
+    const parentDir = path.dirname(staticTarget);
+    if (!fs.existsSync(parentDir)) {
+      fs.mkdirSync(parentDir, { recursive: true });
+    }
+
+    // Copy static files if source exists
+    if (fs.existsSync(staticSource)) {
+      // Use a simple copy approach - in production you might want to use a more robust method
+      fs.cpSync(staticSource, staticTarget, { recursive: true });
+    }
+  } catch (err) {
+    console.error('Failed to ensure static files:', err);
+  }
+}
+
 // Start Next standalone (only in production)
 function startNextStandalone() {
   if (!app.isPackaged) {
@@ -39,9 +77,17 @@ function startNextStandalone() {
     return;
   }
 
-  const serverPath = path.join(
+  // Ensure static files are accessible
+  ensureStaticFiles();
+
+  // Project root where .next directory is located
+  const projectRoot = path.join(
     process.resourcesPath,
-    'app.asar.unpacked',
+    'app.asar.unpacked'
+  );
+
+  const serverPath = path.join(
+    projectRoot,
     '.next',
     'standalone',
     'server.js'
@@ -51,8 +97,8 @@ function startNextStandalone() {
     process.execPath,
     [serverPath],
     {
-      // Important: cwd must be the standalone folder
-      cwd: path.join(process.resourcesPath, 'app.asar.unpacked', '.next', 'standalone'),
+      // Run from project root so Next.js can find static files
+      cwd: projectRoot,
       stdio: 'inherit',
       env: {
         ...process.env,
