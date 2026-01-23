@@ -9,10 +9,12 @@
     "dev:electron": "wait-on http://localhost:3000 && electron .",
     "dev:prod": "npm run build && NODE_ENV=production electron .",
     "build": "next build",
-    "postbuild": "npx @electron/rebuild -f -w better-sqlite3 -p .next/standalone/node_modules -v $(node -p \"require('electron/package.json').version\")",
+    "postbuild": "node scripts/rebuild-native.js",
     "postinstall": "npm rebuild better-sqlite3",
     "build:electron": "next build && npm run postbuild && electron-builder",
-    "build:mac": "next build && npm run postbuild && electron-builder --mac",
+    "build:mac": "next build && npm run postbuild && electron-builder --mac --x64 --arm64",
+    "rebuild:standalone-x64": "node scripts/rebuild-standalone-x64.js",
+    "build:mac-x64": "next build && npm run rebuild:standalone-x64 && electron-builder --mac --x64",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
@@ -73,15 +75,7 @@
     ],
     "mac": {
       "category": "public.app-category.medical",
-      "target": [
-        {
-          "target": "dmg",
-          "arch": [
-            "x64",
-            "arm64"
-          ]
-        }
-      ]
+      "target": "dmg"
     },
     "win": {
       "target": "nsis"
