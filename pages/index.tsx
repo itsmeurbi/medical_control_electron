@@ -125,7 +125,7 @@ export default function Home() {
                         <li key={patient.id}>
                           <Link
                             href={`/patients/${patient.id}/edit`}
-                            className="flex hover:bg-blue-300 p-2"
+                            className="flex hover:bg-blue-300 p-2 text-gray-900"
                             onClick={() => {
                               setSearchResults([]);
                               setSearchText('');
