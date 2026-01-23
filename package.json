@@ -10,6 +10,7 @@
     "dev:prod": "npm run build && NODE_ENV=production electron .",
     "build": "next build",
     "postbuild": "npx @electron/rebuild -f -w better-sqlite3 -p .next/standalone/node_modules -v $(node -p \"require('electron/package.json').version\")",
+    "postinstall": "npm rebuild better-sqlite3",
     "build:electron": "next build && npm run postbuild && electron-builder",
     "build:mac": "next build && npm run postbuild && electron-builder --mac",
     "start": "next start",

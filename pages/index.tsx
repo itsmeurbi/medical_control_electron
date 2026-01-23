@@ -4,6 +4,16 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Patient } from '@/lib/types';
 
+// Extend Window interface for TypeScript
+declare global {
+  interface Window {
+    electronAPI?: {
+      onExportData: (callback: () => void) => void;
+      removeExportListener: () => void;
+    };
+  }
+}
+
 export default function Home() {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState<Patient[]>([]);
@@ -61,6 +71,17 @@ export default function Home() {
   const handleExport = () => {
     window.location.href = '/api/patients/export';
   };
+
+  // Listen for native menu export event
+  useEffect(() => {
+    if (window.electronAPI) {
+      window.electronAPI.onExportData(handleExport);
+
+      return () => {
+        window.electronAPI?.removeExportListener();
+      };
+    }
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col justify-between">
@@ -137,14 +158,6 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
-      <div className="p-4 m-4 self-end">
-        <button
-          onClick={handleExport}
-          className="bg-green-600 hover:bg-green-800 shadow-sm text-white font-bold py-2 px-4 rounded"
-        >
-          Exportar Datos
-        </button>
       </div>
     </div>
   );

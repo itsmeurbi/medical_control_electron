@@ -3,8 +3,10 @@ const path = require('path');
 const { fork } = require('child_process');
 const net = require('net');
 const fs = require('fs');
+const { createMenu } = require('./menu');
 
 let nextProcess;
+let mainWindow;
 
 // Wait for Next server to be ready
 function waitForPort(port, timeout = 15000) {
@@ -86,23 +88,28 @@ function startNextStandalone() {
 
 // Create the Electron window
 async function createWindow() {
-  const win = new BrowserWindow({
+  const preloadPath = path.join(__dirname, 'preload.js');
+
+  mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    webPreferences: { contextIsolation: true },
+    webPreferences: {
+      contextIsolation: true,
+      preload: preloadPath
+    },
     show: false
   });
 
   try {
     if (app.isPackaged) {
       await waitForPort(3000);
-      await win.loadURL('http://localhost:3000');
+      await mainWindow.loadURL('http://localhost:3000');
     } else {
       // In dev mode, Next is already running via npm run dev
-      await win.loadURL('http://localhost:3000');
+      await mainWindow.loadURL('http://localhost:3000');
     }
 
-    win.show();
+    mainWindow.show();
   } catch (err) {
     console.error('Failed to load URL:', err);
   }
@@ -112,6 +119,7 @@ async function createWindow() {
 app.whenReady().then(async () => {
   startNextStandalone();
   await createWindow();
+  createMenu(mainWindow);
 });
 
 // Cleanup

@@ -1,5 +1,10 @@
-const { contextBridge } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Add any Electron APIs you need here
+  onExportData: (callback) => {
+    ipcRenderer.on('export-data', callback);
+  },
+  removeExportListener: () => {
+    ipcRenderer.removeAllListeners('export-data');
+  }
 });
