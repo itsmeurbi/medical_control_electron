@@ -4,18 +4,35 @@ import path from 'path';
 import fs from 'fs';
 import { generateMedicalRecord } from './utils';
 
-const dbPath = path.join(process.cwd(), 'database', 'medical_control.db');
+function getDatabasePath(): string {
+  const userDataPath = process.env.USER_DATA_PATH || path.join(process.cwd(), 'dev-data');
+  return path.join(userDataPath, 'database', 'medical_control.db');
+}
+
+const dbPath = getDatabasePath();
 const dbDir = path.dirname(dbPath);
+
+console.log('Database path:', dbPath);
 
 // Ensure database directory exists
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }
 
-// Use relative path for adapter (as per Prisma 7 docs)
-const relativeDbPath = path.relative(process.cwd(), dbPath);
+// Copy template database if it doesn't exist
+if (!fs.existsSync(dbPath)) {
+  const templateDb = path.join(process.cwd(), 'prisma', 'template.db');
+  if (fs.existsSync(templateDb)) {
+    console.log('Copying template database...');
+    fs.copyFileSync(templateDb, dbPath);
+    console.log('Database initialized from template');
+  } else {
+    console.warn('Template database not found, creating empty database');
+  }
+}
+
 const adapter = new PrismaBetterSqlite3({
-  url: `file:${relativeDbPath}`
+  url: `file:${dbPath}`
 });
 
 const prisma = new PrismaClient({

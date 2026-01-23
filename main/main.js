@@ -46,8 +46,7 @@ function startNextStandalone() {
   const staticSource = path.join(projectRoot, '.next', 'static');
   const staticTarget = path.join(projectRoot, '.next', 'standalone', '.next', 'static');
 
-  // Ensure static files are accessible (copy if target doesn't exist)
-  // This is essential for CSS and other static assets to load in production
+  // Ensure static files are accessible
   if (!fs.existsSync(staticTarget) && fs.existsSync(staticSource)) {
     fs.mkdirSync(path.dirname(staticTarget), { recursive: true });
     fs.cpSync(staticSource, staticTarget, { recursive: true });
@@ -59,14 +58,13 @@ function startNextStandalone() {
     ...process.env,
     NODE_ENV: 'production',
     PORT: '3000',
-    ELECTRON_RUN_AS_NODE: '1'
+    ELECTRON_RUN_AS_NODE: '1',
+    USER_DATA_PATH: app.getPath('userData') // Pass user data path to Next.js
   };
 
-  // Use fork instead of spawn - runs as Node.js child process, not new Electron instance
-  // This prevents a second dock icon from appearing on macOS
   nextProcess = fork(serverPath, [], {
     cwd: projectRoot,
-    silent: false, // Enable logging
+    silent: false,
     env
   });
 
@@ -122,6 +120,7 @@ async function createWindow() {
 
 // App ready
 app.whenReady().then(async () => {
+  console.log('User data path:', app.getPath('userData'));
   startNextStandalone();
   await createWindow();
   createMenu(mainWindow);
