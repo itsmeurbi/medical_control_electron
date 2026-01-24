@@ -1,13 +1,12 @@
-'use client';
-
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
-import { Patient, Consultation } from '../../../lib/types';
-import PatientForm from '../../../components/patients/PatientForm';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Patient, Consultation } from '../../lib/types';
+import PatientForm from '../../components/patients/PatientForm';
+import { apiUrl } from '../../src/utils/api';
 
 export default function EditPatient() {
-  const router = useRouter();
-  const { id } = router.query;
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -34,13 +33,13 @@ export default function EditPatient() {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const fetchTreatments = async (page: number = 1) => {
-    if (!id || typeof id !== 'string') return;
+    if (!id) return;
 
     const patientId = parseInt(id, 10);
     if (isNaN(patientId)) return;
 
     try {
-      const response = await fetch(`/api/consultations?patient_id=${patientId}&page=${page}`);
+      const response = await fetch(apiUrl(`/api/consultations?patient_id=${patientId}&page=${page}`));
       if (response.ok) {
         const data = await response.json();
         setTreatments(data.consultations || []);
@@ -53,7 +52,7 @@ export default function EditPatient() {
 
   useEffect(() => {
     if (id) {
-      fetch(`/api/patients/${id}`)
+      fetch(apiUrl(`/api/patients/${id}`))
         .then(res => res.json())
         .then(data => {
           if (data.birthDate) {
@@ -82,7 +81,7 @@ export default function EditPatient() {
 
   const handleTreatmentDelete = async (consultationId: number) => {
     try {
-      const response = await fetch(`/api/consultations/${consultationId}`, {
+      const response = await fetch(apiUrl(`/api/consultations/${consultationId}`), {
         method: 'DELETE',
       });
 
@@ -105,7 +104,7 @@ export default function EditPatient() {
   };
 
   const handleTreatmentAdd = async (treatmentData: { date: string; procedure: string; meds: string }) => {
-    if (!id || typeof id !== 'string') {
+    if (!id) {
       setErrors({ submit: 'ID de paciente no válido' });
       return;
     }
@@ -117,7 +116,7 @@ export default function EditPatient() {
     }
 
     try {
-      const response = await fetch('/api/consultations', {
+      const response = await fetch(apiUrl('/api/consultations'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -155,7 +154,7 @@ export default function EditPatient() {
         meds: formData.get('meds'),
       };
 
-      const response = await fetch(`/api/consultations/${editingConsultation.id}`, {
+      const response = await fetch(apiUrl(`/api/consultations/${editingConsultation.id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -168,7 +167,7 @@ export default function EditPatient() {
         setEditingConsultation(null);
         // Refresh treatments list (stay on current page)
         fetchTreatments(treatmentPage);
-    } else {
+      } else {
         const error = await response.json();
         setErrors({ submit: error.error || 'Error actualizando el tratamiento' });
       }
@@ -195,8 +194,14 @@ export default function EditPatient() {
       return;
     }
 
+    if (!id) {
+      setErrors({ submit: 'ID de paciente no válido' });
+      setLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/patients/${id}`, {
+      const response = await fetch(apiUrl(`/api/patients/${id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -208,7 +213,7 @@ export default function EditPatient() {
       });
 
       if (response.ok) {
-        router.push('/');
+        navigate('/');
       } else {
         const error = await response.json();
         setErrors({ submit: error.error || 'Error actualizando al paciente' });
@@ -260,7 +265,7 @@ export default function EditPatient() {
           setTreatmentPage(page);
           fetchTreatments(page);
         }}
-        onCancel={() => router.push('/')}
+        onCancel={() => navigate('/')}
       />
 
       {/* Edit Consultation Modal */}
@@ -292,32 +297,32 @@ export default function EditPatient() {
                     <div className="w-full block">
                       <div>
                         <label className="block mb-1 text-gray-900">F. del tratamiento:</label>
-            </div>
-                  <input
+                      </div>
+                      <input
                         type="date"
                         name="date"
                         defaultValue={editingConsultation.date ? editingConsultation.date.split('T')[0] : ''}
-                    className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                        className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
                     <div className="w-full mt-2">
                       <label className="block mb-1 text-gray-900">Procedimiento:</label>
-                  <textarea
+                      <textarea
                         name="procedure"
                         defaultValue={editingConsultation.procedure || ''}
-                    className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                         rows={4}
-                  />
-                </div>
+                      />
+                    </div>
                     <div className="w-full mt-2">
                       <label className="block mb-1 text-gray-900">Medicamentos:</label>
-                  <textarea
+                      <textarea
                         name="meds"
                         defaultValue={editingConsultation.meds || ''}
-                    className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                         rows={4}
-                  />
-                </div>
+                      />
+                    </div>
                     <div className="flex justify-end mt-4">
                       <button
                         type="submit"
@@ -335,7 +340,7 @@ export default function EditPatient() {
                       >
                         Cancelar
                       </button>
-              </div>
+                    </div>
                   </form>
                 </div>
               </div>

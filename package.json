@@ -2,36 +2,27 @@
   "name": "medical-control-electron",
   "version": "0.1.0",
   "private": true,
-  "main": "main/main.js",
+  "main": "dist-electron/main.js",
+  "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:next\" \"npm run dev:electron\"",
-    "dev:next": "next dev",
-    "dev:electron": "wait-on http://localhost:3000 && electron .",
-    "dev:prod": "npm run build && NODE_ENV=production electron .",
-    "prebuild": "node scripts/prepare-db.js",
-    "build": "next build",
-    "postbuild": "node scripts/rebuild-native.js",
-    "postinstall": "npm rebuild better-sqlite3",
-    "build:electron": "next build && npm run postbuild && electron-builder",
-    "build:mac": "next build && npm run postbuild && electron-builder --mac --x64 --arm64",
-    "rebuild:standalone-x64": "node scripts/rebuild-standalone-x64.js",
-    "build:mac-x64": "next build && npm run rebuild:standalone-x64 && electron-builder --mac --x64",
-    "start": "next start",
+    "dev": "vite",
+    "prebuild": "prisma generate && node scripts/prepare-db.js",
+    "build": "tsc && vite build && electron-builder",
+    "build:mac": "npm run build && electron-builder --mac --arm64 --x64",
     "lint": "eslint",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
-    "package": "electron-builder",
-    "package:mac": "electron-builder --mac"
+    "postinstall": "npx @electron/rebuild -f -w better-sqlite3"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "csv-stringify": "^6.4.4",
     "jszip": "^3.10.1",
-    "next": "16.1.4",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-router-dom": "^6.20.0"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.7.2",
@@ -39,51 +30,15 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "concurrently": "^8.2.2",
+    "@vitejs/plugin-react": "^4.2.1",
     "electron": "^40.0.0",
     "electron-builder": "^26.4.0",
     "eslint": "^9",
-    "eslint-config-next": "16.1.4",
     "prisma": "^7.3.0",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "wait-on": "^7.2.0"
-  },
-  "build": {
-    "asar": true,
-    "asarUnpack": [
-      ".next/standalone/**",
-      ".next/static/**",
-      "prisma/**",
-      "database/**"
-    ],
-    "appId": "com.medicalcontrol.app",
-    "productName": "Medical Control",
-    "directories": {
-      "output": "dist"
-    },
-    "npmRebuild": true,
-    "buildDependenciesFromSource": true,
-    "files": [
-      "main/**/*",
-      "lib/**/*",
-      ".next/standalone/**/*",
-      ".next/static/**/*",
-      "public/**/*",
-      "prisma/template.db",
-      "prisma/schema.prisma",
-      "package.json",
-      "!.next/standalone/dist/**/*"
-    ],
-    "mac": {
-      "category": "public.app-category.medical",
-      "target": "dmg"
-    },
-    "win": {
-      "target": "nsis"
-    },
-    "linux": {
-      "target": "AppImage"
-    }
+    "vite": "^5.0.8",
+    "vite-plugin-electron": "^0.28.6",
+    "vite-plugin-electron-renderer": "^0.14.6"
   }
 }

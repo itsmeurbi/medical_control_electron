@@ -1,8 +1,6 @@
-'use client';
-
 import { useState } from 'react';
-import { Patient, Gender, MaritalStatus, Evera, BloodType, RhFactor, Consultation } from '@/lib/types';
-import { calculateAge } from '@/lib/utils';
+import { Patient, Gender, MaritalStatus, Evera, BloodType, RhFactor, Consultation } from '../../lib/types';
+import { calculateAge } from '../../lib/utils';
 
 interface PatientFormProps {
   formData?: Partial<Patient>;

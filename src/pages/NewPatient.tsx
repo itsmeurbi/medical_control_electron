@@ -1,12 +1,11 @@
-'use client';
-
 import { useState } from 'react';
-import { useRouter } from 'next/router';
+import { useNavigate } from 'react-router-dom';
 import { Patient } from '../../lib/types';
 import PatientForm from '../../components/patients/PatientForm';
+import { apiUrl } from '../../src/utils/api';
 
 export default function NewPatient() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -41,7 +40,7 @@ export default function NewPatient() {
     }
 
     try {
-      const response = await fetch('/api/patients', {
+      const response = await fetch(apiUrl('/api/patients'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,7 +52,7 @@ export default function NewPatient() {
       });
 
       if (response.ok) {
-        router.push('/');
+        navigate('/');
       } else {
         const error = await response.json();
         setErrors({ submit: error.error || 'Error creando al paciente' });
@@ -88,7 +87,7 @@ export default function NewPatient() {
         isEdit={false}
         treatment={treatment}
         setTreatment={setTreatment}
-        onCancel={() => router.push('/')}
+        onCancel={() => navigate('/')}
       />
     </div>
   );

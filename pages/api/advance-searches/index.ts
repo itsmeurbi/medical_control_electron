@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { calculateAge, generateMedicalRecord } from '@/lib/utils';
-import prisma from '@/lib/database';
-import { Patient } from '@/lib/types';
+import { calculateAge, generateMedicalRecord } from '../../../lib/utils';
+import prisma from '../../../electron/lib/database';
+import { Patient } from '../../../lib/types';
 
 async function advancedSearch(attributeName: string, attributeValue: string, matchType: string): Promise<Patient[]> {
   if (!attributeName || !attributeValue) {

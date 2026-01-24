@@ -1,18 +1,7 @@
-'use client';
-
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { Patient } from '../lib/types';
-
-// Extend Window interface for TypeScript
-declare global {
-  interface Window {
-    electronAPI?: {
-      onExportData: (callback: () => void) => void;
-      removeExportListener: () => void;
-    };
-  }
-}
+import { Link } from 'react-router-dom';
+import { Patient } from '../../lib/types';
+import { apiUrl } from '../../src/utils/api';
 
 export default function Home() {
   const [searchText, setSearchText] = useState('');
@@ -50,7 +39,7 @@ export default function Home() {
     }
 
     searchTimeoutRef.current = setTimeout(() => {
-      fetch(`/api/patients/search?text=${encodeURIComponent(searchText)}`)
+      fetch(apiUrl(`/api/patients/search?text=${encodeURIComponent(searchText)}`))
         .then(res => res.json())
         .then(data => {
           setSearchResults(data);
@@ -69,7 +58,7 @@ export default function Home() {
   }, [searchText]);
 
   const handleExport = () => {
-    window.location.href = '/api/patients/export';
+    window.location.href = apiUrl('/api/patients/export');
   };
 
   // Listen for native menu export event
@@ -124,7 +113,7 @@ export default function Home() {
                       {searchResults.map((patient) => (
                         <li key={patient.id}>
                           <Link
-                            href={`/patients/${patient.id}/edit`}
+                            to={`/patients/${patient.id}/edit`}
                             className="flex hover:bg-blue-300 p-2 text-gray-900"
                             onClick={() => {
                               setSearchResults([]);
@@ -141,7 +130,7 @@ export default function Home() {
                 )}
               </div>
               <Link
-                href="/advance-search"
+                to="/advance-search"
                 className="text-blue-800 hover:text-blue-900 shrink-0"
                 title="Editar"
               >
@@ -150,7 +139,7 @@ export default function Home() {
             </div>
             <div className="flex gap-3">
               <Link
-                href="/patients/new"
+                to="/patients/new"
                 className="bg-blue-600 hover:bg-blue-800 shadow-sm text-white font-bold py-2 px-4 rounded"
               >
                 Agregar paciente

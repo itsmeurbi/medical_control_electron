@@ -1,8 +1,7 @@
-'use client';
-
 import { useState } from 'react';
-import Link from 'next/link';
-import { Patient } from '../lib/types';
+import { Link } from 'react-router-dom';
+import { Patient } from '../../lib/types';
+import { apiUrl } from '../../src/utils/api';
 
 // Searchable attributes with labels
 const searchableAttributes = [
@@ -53,7 +52,7 @@ export default function AdvanceSearch() {
         page: page.toString(),
       });
 
-      const response = await fetch(`/api/advance-searches?${params}`);
+      const response = await fetch(apiUrl(`/api/advance-searches?${params}`));
       const data = await response.json();
 
       setResults(data.patients || []);
@@ -76,7 +75,7 @@ export default function AdvanceSearch() {
               Búsqueda avanzada
             </h3>
             <Link
-              href="/"
+              to="/"
               className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
             >
               <svg
@@ -171,7 +170,7 @@ export default function AdvanceSearch() {
                   {loading ? 'Buscando...' : 'Buscar'}
                 </button>
                 <Link
-                  href="/"
+                  to="/"
                   className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
                 >
                   Cancelar
@@ -202,7 +201,7 @@ export default function AdvanceSearch() {
                       <tr key={patient.id} className="hover:bg-blue-50 hover:shadow-md transition-all duration-200 ease-in-out">
                         <td>
                           <Link
-                            href={`/patients/${patient.id}/edit`}
+                            to={`/patients/${patient.id}/edit`}
                             className="block px-6 py-4 whitespace-nowrap hover:text-blue-600"
                           >
                             {patient.name}
@@ -211,7 +210,7 @@ export default function AdvanceSearch() {
                         {attributeName !== 'name' && attributeName !== 'medical_record' && (
                           <td>
                             <Link
-                              href={`/patients/${patient.id}/edit`}
+                              to={`/patients/${patient.id}/edit`}
                               className="block px-6 py-4 whitespace-nowrap hover:text-blue-600"
                             >
                               {String((patient as unknown as Record<string, unknown>)[attributeName] || '')}

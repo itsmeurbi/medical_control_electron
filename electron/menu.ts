@@ -1,11 +1,11 @@
-const { app, Menu } = require('electron');
+import { app, Menu, BrowserWindow } from 'electron';
 
 /**
  * Creates and sets the application menu
- * @param {BrowserWindow} mainWindow - The main browser window instance
+ * @param mainWindow - The main browser window instance
  */
-function createMenu(mainWindow) {
-  const template = [
+export function createMenu(mainWindow: BrowserWindow) {
+  const template: any[] = [
     {
       label: 'File',
       submenu: [
@@ -51,5 +51,3 @@ function createMenu(mainWindow) {
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
 }
-
-module.exports = { createMenu };
