@@ -95,8 +95,7 @@ This will:
 ├── lib/                # Shared utilities
 ├── prisma/             # Prisma schema
 ├── public/             # Static assets
-├── scripts/            # Build/db scripts
-└── pages/              # Legacy Next.js pages (if still present)
+└── scripts/            # Build/db scripts
 ```
 
 ## Routing Notes (Electron)
