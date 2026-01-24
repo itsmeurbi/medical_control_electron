@@ -1,6 +1,6 @@
 # Medical Control
 
-A specialized desktop application for pain management physicians to manage patient records, clinical assessments, and treatment tracking. Built with Electron, Next.js, and TypeScript, this application is designed specifically for pain doctors to efficiently document patient consultations, pain assessments, physical examinations, and treatment protocols.
+A specialized desktop application for pain management physicians to manage patient records, clinical assessments, and treatment tracking. Built with Electron + Vite + React + TypeScript for a fast, offline-first desktop workflow tailored to pain specialists.
 
 ## Features
 
@@ -41,10 +41,10 @@ Designed specifically for pain management specialists, the application includes:
 
 ## Tech Stack
 
-- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
-- **Backend**: Next.js API Routes
+- **Renderer**: Vite + React 19 + TypeScript + Tailwind CSS
+- **Routing**: React Router (HashRouter for Electron)
+- **Desktop**: Electron 30
 - **Database**: SQLite with Prisma ORM
-- **Desktop**: Electron 40
 - **Build**: electron-builder
 
 ## Setup
@@ -54,28 +54,26 @@ Designed specifically for pain management specialists, the application includes:
 npm install
 ```
 
-2. Run the development server:
+2. Run development mode:
 ```bash
 npm run dev
 ```
 
 This will:
-- Start the Next.js dev server on http://localhost:3000
+- Start the Vite dev server
 - Launch the Electron app window
 
 ## Available Scripts
 
 ### Development
-- `npm run dev` - Start both Next.js and Electron in development mode
-- `npm run dev:next` - Start only Next.js dev server
-- `npm run dev:electron` - Start only Electron (waits for Next.js)
+- `npm run dev` - Start Vite and Electron in development mode
 
 ### Building
-- `npm run build` - Build Next.js for production
+- `npm run build` - Typecheck, build renderer, and package Electron
 - `npm run build:mac` - Build for macOS (both x64 and arm64)
-- `npm run build:mac-x64` - Build for Intel Macs only (x64)
-- `npm run package` - Package the app for distribution
-- `npm run package:mac` - Package specifically for macOS
+
+### Quality
+- `npm run lint` - Run ESLint
 
 ### Database
 - `npm run db:generate` - Generate Prisma client
@@ -85,48 +83,50 @@ This will:
 ## Project Structure
 
 ```
-├── main/              # Electron main process files
-│   ├── main.js        # Main Electron process
-│   ├── preload.js     # Preload script for IPC
-│   └── menu.js        # Native menu configuration
-├── pages/             # Next.js pages (Pages Router)
-│   ├── api/           # API routes
-│   ├── patients/      # Patient management pages
-│   └── advance-search.tsx
-├── components/        # React components
-│   └── patients/      # Patient-related components
-├── lib/               # Shared utilities
-│   ├── database.ts    # Prisma database client
-│   ├── types.ts       # TypeScript type definitions
-│   └── utils.ts       # Utility functions
-├── prisma/            # Prisma schema
-└── scripts/           # Build scripts
-    ├── rebuild-native.js        # Universal binary rebuild
-    └── rebuild-standalone-x64.js # x64-only rebuild
+├── electron/           # Electron main/preload/menu
+│   ├── main.ts         # Main Electron process
+│   ├── preload.ts      # Preload script for IPC
+│   └── menu.ts         # Native menu configuration
+├── src/                # Vite renderer (React)
+│   ├── pages/          # React pages (routing targets)
+│   ├── utils/          # Renderer helpers (IPC fetch bridge)
+│   └── main.tsx        # React entry
+├── components/         # React components
+├── lib/                # Shared utilities
+├── prisma/             # Prisma schema
+├── public/             # Static assets
+├── scripts/            # Build/db scripts
+└── pages/              # Legacy Next.js pages (if still present)
 ```
+
+## Routing Notes (Electron)
+
+Electron apps should use **HashRouter** (not BrowserRouter).
+This ensures routes work correctly when the renderer is loaded via `file://` in production.
+
+## IPC API (Renderer to Main)
+
+Renderer-side `fetch('/api/...')` is intercepted and routed through Electron IPC.
+This provides a familiar fetch-based API without running an HTTP server.
+
+Example:
+```ts
+await fetch('/api/patients/search?text=juan')
+```
+
+## Export Notes
+
+Exports are triggered via the native **File -> Export Data** menu or UI action.
+The export flow uses IPC and creates a blob URL in the renderer for download.
 
 ## Database
 
-The app uses SQLite stored in `database/medical_control.db`. The database is automatically created and initialized on first run using Prisma migrations.
-
-## Building for Distribution
-
-### macOS Universal Build (Apple Silicon + Intel)
-```bash
-npm run build:mac
-```
-This creates a universal binary that works on both Apple Silicon and Intel Macs.
-
-### macOS Intel-only Build
-```bash
-npm run build:mac-x64
-```
-Use this when you need to build specifically for Intel Macs. The build process will:
-1. Rebuild native modules (better-sqlite3) for x64 architecture
-2. Package the app for Intel Macs
+The app uses SQLite stored under Electron's user data directory, for example:
+`<userData>/database/medical_control.db`.
+The database is automatically created and initialized on first run using Prisma migrations.
 
 ## Native Menu
 
 The application includes a native macOS menu with:
-- **File** → **Export Data** (Cmd+E) - Exports patient and consultation data to CSV/ZIP
+- **File** -> **Export Data** (Cmd+E) - Exports patient and consultation data to CSV/ZIP
 - Standard macOS app menu items
