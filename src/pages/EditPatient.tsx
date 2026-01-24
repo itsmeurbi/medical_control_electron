@@ -228,105 +228,107 @@ export default function EditPatient() {
 
   if (fetching) {
     return (
-      <div className="shadow rounded p-4 m-4 bg-blue-50">
-        <p>Cargando...</p>
+      <div className="min-h-screen bg-slate-50">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm text-slate-600">Cargando...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="shadow rounded p-4 m-4 bg-blue-50">
-      <h1 className="text-3xl font-bold mb-4 text-black flex text-blue-800 justify-center">
-        Editar Paciente
-      </h1>
-
-      {errors.submit && (
-        <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {errors.submit}
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-slate-900">Editar Paciente</h1>
         </div>
-      )}
 
-      <PatientForm
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        loading={loading}
-        onSubmit={handleSubmit}
-        submitLabel="Actualizar paciente"
-        isEdit={true}
-        treatments={treatments}
-        treatment={treatment}
-        setTreatment={setTreatment}
-        onTreatmentDelete={handleTreatmentDelete}
-        onTreatmentEdit={handleTreatmentEdit}
-        onTreatmentAdd={handleTreatmentAdd}
-        treatmentPagination={treatmentPagination}
-        onTreatmentPageChange={(page) => {
-          setTreatmentPage(page);
-          fetchTreatments(page);
-        }}
-        onCancel={() => navigate('/')}
-      />
+        {errors.submit && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errors.submit}
+          </div>
+        )}
 
-      {/* Edit Consultation Modal */}
-      {showEditModal && editingConsultation && (
-        <div className="shadow bg-gray-900/50 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full flex">
-          <div className="relative p-4 w-full max-w-2xl max-h-full">
-            <div className="relative bg-white rounded-lg shadow">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Editar tratamiento
-                </h3>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setEditingConsultation(null);
-                  }}
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center"
-                >
-                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-              <div className="p-4">
-                <div className="grid justify-items-center p-4">
-                  <form onSubmit={handleConsultationUpdate} className="flex flex-col w-full">
-                    <div className="w-full block">
-                      <div>
-                        <label className="block mb-1 text-gray-900">F. del tratamiento:</label>
-                      </div>
+        <PatientForm
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          loading={loading}
+          onSubmit={handleSubmit}
+          submitLabel="Actualizar paciente"
+          isEdit={true}
+          treatments={treatments}
+          treatment={treatment}
+          setTreatment={setTreatment}
+          onTreatmentDelete={handleTreatmentDelete}
+          onTreatmentEdit={handleTreatmentEdit}
+          onTreatmentAdd={handleTreatmentAdd}
+          treatmentPagination={treatmentPagination}
+          onTreatmentPageChange={(page) => {
+            setTreatmentPage(page);
+            fetchTreatments(page);
+          }}
+          onCancel={() => navigate('/')}
+        />
+
+        {/* Edit Consultation Modal */}
+        {showEditModal && editingConsultation && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+            <div className="w-full max-w-2xl">
+              <div className="rounded-2xl bg-white shadow-xl">
+                <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Editar tratamiento
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditingConsultation(null);
+                    }}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                  >
+                    <svg className="h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                      <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span className="sr-only">Close modal</span>
+                  </button>
+                </div>
+                <div className="px-6 py-5">
+                  <form onSubmit={handleConsultationUpdate} className="flex flex-col gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600">F. del tratamiento</label>
                       <input
                         type="date"
                         name="date"
                         defaultValue={editingConsultation.date ? editingConsultation.date.split('T')[0] : ''}
-                        className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
                       />
                     </div>
-                    <div className="w-full mt-2">
-                      <label className="block mb-1 text-gray-900">Procedimiento:</label>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600">Procedimiento</label>
                       <textarea
                         name="procedure"
                         defaultValue={editingConsultation.procedure || ''}
-                        className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
                         rows={4}
                       />
                     </div>
-                    <div className="w-full mt-2">
-                      <label className="block mb-1 text-gray-900">Medicamentos:</label>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-600">Medicamentos</label>
                       <textarea
                         name="meds"
                         defaultValue={editingConsultation.meds || ''}
-                        className="w-full rounded p-2 text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-3 py-2 text-sm text-slate-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
                         rows={4}
                       />
                     </div>
-                    <div className="flex justify-end mt-4">
+                    <div className="flex justify-end gap-2">
                       <button
                         type="submit"
-                        className="bg-blue-600 hover:bg-blue-800 shadow-sm text-white font-bold py-2 px-4 rounded block mr-2 cursor-pointer"
+                        className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100"
                       >
                         Actualizar Tratamiento
                       </button>
@@ -336,7 +338,7 @@ export default function EditPatient() {
                           setShowEditModal(false);
                           setEditingConsultation(null);
                         }}
-                        className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-4 rounded border"
+                        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200"
                       >
                         Cancelar
                       </button>
@@ -346,8 +348,8 @@ export default function EditPatient() {
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

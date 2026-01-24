@@ -66,29 +66,31 @@ export default function NewPatient() {
   };
 
   return (
-    <div className="shadow rounded p-4 m-4 bg-blue-50">
-      <h1 className="text-3xl font-bold mb-4 text-black flex text-blue-800 justify-center">
-        Nuevo Paciente
-      </h1>
-
-      {errors.submit && (
-        <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {errors.submit}
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-semibold text-slate-900">Nuevo Paciente</h1>
         </div>
-      )}
 
-      <PatientForm
-        formData={formData}
-        setFormData={setFormData}
-        errors={errors}
-        loading={loading}
-        onSubmit={handleSubmit}
-        submitLabel="Agregar paciente"
-        isEdit={false}
-        treatment={treatment}
-        setTreatment={setTreatment}
-        onCancel={() => navigate('/')}
-      />
+        {errors.submit && (
+          <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {errors.submit}
+          </div>
+        )}
+
+        <PatientForm
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          loading={loading}
+          onSubmit={handleSubmit}
+          submitLabel="Agregar paciente"
+          isEdit={false}
+          treatment={treatment}
+          setTreatment={setTreatment}
+          onCancel={() => navigate('/')}
+        />
+      </div>
     </div>
   );
 }

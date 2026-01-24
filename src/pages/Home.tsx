@@ -73,78 +73,75 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col justify-between">
-      <div className="shadow-sm rounded p-4 m-4 bg-blue-50">
-        <h1 className="text-3xl font-bold mb-4 text-black flex justify-center text-blue-900">
-          Pacientes
-        </h1>
-        <div className="shadow-sm rounded p-4 mb-6 bg-white">
-          <div className="pb-4 bg-white mt-4 flex justify-between items-center relative">
-            <div className="flex items-start flex-col gap-2 w-3/6">
-              <div ref={searchFieldRef} className="w-full relative">
-                <label htmlFor="table-search" className="sr-only text-gray-900">Search</label>
-                <div className="relative mt-1">
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                    <svg
-                      className="w-5 h-5 text-gray-500"
-                      aria-hidden="true"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Busqueda por nombre"
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    className="rounded block p-2 pl-10 w-full text-sm text-gray-900 border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  />
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h1 className="text-2xl font-semibold text-slate-900">Pacientes</h1>
+          <Link
+            to="/patients/new"
+            className="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100"
+          >
+            Agregar paciente
+          </Link>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div ref={searchFieldRef} className="relative w-full sm:max-w-md">
+              <label htmlFor="table-search" className="sr-only text-slate-600">Search</label>
+              <div className="relative">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <svg
+                    className="h-5 w-5 text-slate-400"
+                    aria-hidden="true"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
                 </div>
-                {showSearchResults && searchResults.length > 0 && (
-                  <div className="shadow w-3/12 rounded absolute bg-white top-10 z-10">
-                    <ul id="patients-list" className="max-h-60 overflow-y-auto">
-                      {searchResults.map((patient) => (
-                        <li key={patient.id}>
-                          <Link
-                            to={`/patients/${patient.id}/edit`}
-                            className="flex hover:bg-blue-300 p-2 text-gray-900"
-                            onClick={() => {
-                              setSearchResults([]);
-                              setSearchText('');
-                            }}
-                          >
-                            {patient.name}
-                          </Link>
-                          <hr />
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+                <input
+                  type="text"
+                  placeholder="Busqueda por nombre"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  className="h-11 w-full rounded-full border border-slate-200 bg-slate-50/70 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-100"
+                />
               </div>
-              <Link
-                to="/advance-search"
-                className="text-blue-800 hover:text-blue-900 shrink-0"
-                title="Editar"
-              >
-                Busqueda Avanzada
-              </Link>
+              {showSearchResults && searchResults.length > 0 && (
+                <div className="absolute left-0 top-full z-10 mt-2 w-full rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+                  <ul id="patients-list" className="max-h-64 overflow-y-auto">
+                    {searchResults.map((patient) => (
+                      <li key={patient.id} className="border-b border-slate-100 last:border-b-0">
+                        <Link
+                          to={`/patients/${patient.id}/edit`}
+                          className="flex items-center rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-slate-50"
+                          onClick={() => {
+                            setSearchResults([]);
+                            setSearchText('');
+                          }}
+                        >
+                          {patient.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
-            <div className="flex gap-3">
-              <Link
-                to="/patients/new"
-                className="bg-blue-600 hover:bg-blue-800 shadow-sm text-white font-bold py-2 px-4 rounded"
-              >
-                Agregar paciente
-              </Link>
-            </div>
+
+            <Link
+              to="/advance-search"
+              className="text-sm font-medium text-blue-600 transition hover:text-blue-700"
+              title="Editar"
+            >
+              Busqueda Avanzada
+            </Link>
           </div>
         </div>
       </div>
