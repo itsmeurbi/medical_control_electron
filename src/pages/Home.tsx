@@ -57,8 +57,8 @@ export default function Home() {
     };
   }, [searchText]);
 
-  const handleExport = () => {
-    window.location.href = apiUrl('/api/patients/export');
+  const handleExport = async () => {
+    await fetch(apiUrl('/api/patients/export'));
   };
 
   // Listen for native menu export event
