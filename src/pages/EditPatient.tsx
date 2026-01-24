@@ -227,15 +227,7 @@ export default function EditPatient() {
   };
 
   if (fetching) {
-    return (
-      <div className="min-h-screen bg-slate-50">
-        <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8">
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <p className="text-sm text-slate-600">Cargando...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="min-h-screen bg-slate-50" />;
   }
 
   return (
