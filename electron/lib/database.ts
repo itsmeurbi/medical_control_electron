@@ -108,12 +108,6 @@ export const patientQueries = {
     // Remove relation fields and computed fields that shouldn't be updated
     const {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _treatments,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _age,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      _medical_record,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       treatments,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       age,
@@ -151,12 +145,7 @@ export const patientQueries = {
     // SQLite doesn't support case-insensitive mode, so we use contains without mode
     return prisma.patient.findMany({
       where: {
-        OR: [
-          { name: { contains: query } },
-          { medicalRecord: { contains: query } },
-          { city: { contains: query } },
-          { phoneNumber: { contains: query } },
-        ],
+        name: { contains: query },
       },
       orderBy: { name: 'asc' },
       take: 10,
