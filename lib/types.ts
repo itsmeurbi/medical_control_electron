@@ -1,6 +1,6 @@
 export enum Gender {
-  Masculino = 0,
-  Femenino = 1
+  Masculino = 'masculino',
+  Femenino = 'femenino'
 }
 
 export enum MaritalStatus {

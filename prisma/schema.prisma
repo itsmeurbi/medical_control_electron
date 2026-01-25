@@ -16,7 +16,7 @@ model Patient {
   phoneNumber          String?        @map("phone_number")
   medicalRecord        String?        @map("medical_record")
   registeredAt         String         @map("registered_at")
-  gender               Int
+  gender               String
   maritalStatus        Int?           @map("marital_status")
   reference            String?
   occupations          String?

@@ -141,9 +141,7 @@ export default function PatientForm({
               <select
                 required
                 value={safeFormData.gender ?? ''}
-                onChange={(e) =>
-                  setFormData({ ...formData, gender: parseInt(e.target.value) as Gender })
-                }
+                onChange={(e) => setFormData({ ...formData, gender: e.target.value as Gender })}
                 className={`${selectBase} ${errors.gender ? inputError : ''}`}
               >
                 <option value=""></option>

@@ -28,7 +28,6 @@ export type AggregatePatient = {
 
 export type PatientAvgAggregateOutputType = {
   id: number | null
-  gender: number | null
   maritalStatus: number | null
   evaluation: number | null
   evera: number | null
@@ -42,7 +41,6 @@ export type PatientAvgAggregateOutputType = {
 
 export type PatientSumAggregateOutputType = {
   id: number | null
-  gender: number | null
   maritalStatus: number | null
   evaluation: number | null
   evera: number | null
@@ -63,7 +61,7 @@ export type PatientMinAggregateOutputType = {
   phoneNumber: string | null
   medicalRecord: string | null
   registeredAt: string | null
-  gender: number | null
+  gender: string | null
   maritalStatus: number | null
   reference: string | null
   occupations: string | null
@@ -132,7 +130,7 @@ export type PatientMaxAggregateOutputType = {
   phoneNumber: string | null
   medicalRecord: string | null
   registeredAt: string | null
-  gender: number | null
+  gender: string | null
   maritalStatus: number | null
   reference: string | null
   occupations: string | null
@@ -265,7 +263,6 @@ export type PatientCountAggregateOutputType = {
 
 export type PatientAvgAggregateInputType = {
   id?: true
-  gender?: true
   maritalStatus?: true
   evaluation?: true
   evera?: true
@@ -279,7 +276,6 @@ export type PatientAvgAggregateInputType = {
 
 export type PatientSumAggregateInputType = {
   id?: true
-  gender?: true
   maritalStatus?: true
   evaluation?: true
   evera?: true
@@ -594,7 +590,7 @@ export type PatientGroupByOutputType = {
   phoneNumber: string | null
   medicalRecord: string | null
   registeredAt: string
-  gender: number
+  gender: string
   maritalStatus: number | null
   reference: string | null
   occupations: string | null
@@ -686,7 +682,7 @@ export type PatientWhereInput = {
   phoneNumber?: Prisma.StringNullableFilter<"Patient"> | string | null
   medicalRecord?: Prisma.StringNullableFilter<"Patient"> | string | null
   registeredAt?: Prisma.StringFilter<"Patient"> | string
-  gender?: Prisma.IntFilter<"Patient"> | number
+  gender?: Prisma.StringFilter<"Patient"> | string
   maritalStatus?: Prisma.IntNullableFilter<"Patient"> | number | null
   reference?: Prisma.StringNullableFilter<"Patient"> | string | null
   occupations?: Prisma.StringNullableFilter<"Patient"> | string | null
@@ -829,7 +825,7 @@ export type PatientWhereUniqueInput = Prisma.AtLeast<{
   phoneNumber?: Prisma.StringNullableFilter<"Patient"> | string | null
   medicalRecord?: Prisma.StringNullableFilter<"Patient"> | string | null
   registeredAt?: Prisma.StringFilter<"Patient"> | string
-  gender?: Prisma.IntFilter<"Patient"> | number
+  gender?: Prisma.StringFilter<"Patient"> | string
   maritalStatus?: Prisma.IntNullableFilter<"Patient"> | number | null
   reference?: Prisma.StringNullableFilter<"Patient"> | string | null
   occupations?: Prisma.StringNullableFilter<"Patient"> | string | null
@@ -976,7 +972,7 @@ export type PatientScalarWhereWithAggregatesInput = {
   phoneNumber?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   medicalRecord?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   registeredAt?: Prisma.StringWithAggregatesFilter<"Patient"> | string
-  gender?: Prisma.IntWithAggregatesFilter<"Patient"> | number
+  gender?: Prisma.StringWithAggregatesFilter<"Patient"> | string
   maritalStatus?: Prisma.IntNullableWithAggregatesFilter<"Patient"> | number | null
   reference?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   occupations?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
@@ -1044,7 +1040,7 @@ export type PatientCreateInput = {
   phoneNumber?: string | null
   medicalRecord?: string | null
   registeredAt: string
-  gender: number
+  gender: string
   maritalStatus?: number | null
   reference?: string | null
   occupations?: string | null
@@ -1114,7 +1110,7 @@ export type PatientUncheckedCreateInput = {
   phoneNumber?: string | null
   medicalRecord?: string | null
   registeredAt: string
-  gender: number
+  gender: string
   maritalStatus?: number | null
   reference?: string | null
   occupations?: string | null
@@ -1183,7 +1179,7 @@ export type PatientUpdateInput = {
   phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.IntFieldUpdateOperationsInput | number
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
   maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1253,7 +1249,7 @@ export type PatientUncheckedUpdateInput = {
   phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.IntFieldUpdateOperationsInput | number
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
   maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1323,7 +1319,7 @@ export type PatientCreateManyInput = {
   phoneNumber?: string | null
   medicalRecord?: string | null
   registeredAt: string
-  gender: number
+  gender: string
   maritalStatus?: number | null
   reference?: string | null
   occupations?: string | null
@@ -1391,7 +1387,7 @@ export type PatientUpdateManyMutationInput = {
   phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.IntFieldUpdateOperationsInput | number
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
   maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1460,7 +1456,7 @@ export type PatientUncheckedUpdateManyInput = {
   phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.IntFieldUpdateOperationsInput | number
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
   maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1591,7 +1587,6 @@ export type PatientCountOrderByAggregateInput = {
 
 export type PatientAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  gender?: Prisma.SortOrder
   maritalStatus?: Prisma.SortOrder
   evaluation?: Prisma.SortOrder
   evera?: Prisma.SortOrder
@@ -1743,7 +1738,6 @@ export type PatientMinOrderByAggregateInput = {
 
 export type PatientSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  gender?: Prisma.SortOrder
   maritalStatus?: Prisma.SortOrder
   evaluation?: Prisma.SortOrder
   evera?: Prisma.SortOrder
@@ -1768,14 +1762,6 @@ export type NullableStringFieldUpdateOperationsInput = {
   set?: string | null
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type NullableIntFieldUpdateOperationsInput = {
   set?: number | null
   increment?: number
@@ -1794,6 +1780,14 @@ export type NullableFloatFieldUpdateOperationsInput = {
 
 export type NullableBoolFieldUpdateOperationsInput = {
   set?: boolean | null
+}
+
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type PatientCreateNestedOneWithoutTreatmentsInput = {
@@ -1818,7 +1812,7 @@ export type PatientCreateWithoutTreatmentsInput = {
   phoneNumber?: string | null
   medicalRecord?: string | null
   registeredAt: string
-  gender: number
+  gender: string
   maritalStatus?: number | null
   reference?: string | null
   occupations?: string | null
@@ -1887,7 +1881,7 @@ export type PatientUncheckedCreateWithoutTreatmentsInput = {
   phoneNumber?: string | null
   medicalRecord?: string | null
   registeredAt: string
-  gender: number
+  gender: string
   maritalStatus?: number | null
   reference?: string | null
   occupations?: string | null
@@ -1971,7 +1965,7 @@ export type PatientUpdateWithoutTreatmentsInput = {
   phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.IntFieldUpdateOperationsInput | number
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
   maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2040,7 +2034,7 @@ export type PatientUncheckedUpdateWithoutTreatmentsInput = {
   phoneNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
-  gender?: Prisma.IntFieldUpdateOperationsInput | number
+  gender?: Prisma.StringFieldUpdateOperationsInput | string
   maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2431,7 +2425,7 @@ export type $PatientPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     phoneNumber: string | null
     medicalRecord: string | null
     registeredAt: string
-    gender: number
+    gender: string
     maritalStatus: number | null
     reference: string | null
     occupations: string | null
@@ -2921,7 +2915,7 @@ export interface PatientFieldRefs {
   readonly phoneNumber: Prisma.FieldRef<"Patient", 'String'>
   readonly medicalRecord: Prisma.FieldRef<"Patient", 'String'>
   readonly registeredAt: Prisma.FieldRef<"Patient", 'String'>
-  readonly gender: Prisma.FieldRef<"Patient", 'Int'>
+  readonly gender: Prisma.FieldRef<"Patient", 'String'>
   readonly maritalStatus: Prisma.FieldRef<"Patient", 'Int'>
   readonly reference: Prisma.FieldRef<"Patient", 'String'>
   readonly occupations: Prisma.FieldRef<"Patient", 'String'>
