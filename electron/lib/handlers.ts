@@ -17,6 +17,119 @@ function cleanData(data: any): any {
   return cleaned;
 }
 
+// Transform patient data to snake_case for backward compatibility
+function transformPatientForExport(patient: any): any {
+  // Map camelCase to snake_case matching the reference CSV column order
+  const mapping: Record<string, string> = {
+    id: 'id',
+    name: 'name',
+    birthDate: 'birth_date',
+    city: 'city',
+    address: 'address',
+    phoneNumber: 'phone_number',
+    medicalRecord: 'medical_record',
+    registeredAt: 'registered_at',
+    gender: 'gender',
+    maritalStatus: 'marital_status',
+    reference: 'reference',
+    occupations: 'occupations',
+    primaryDx: 'primary_dx',
+    initialDx: 'initial_dx',
+    finalDx: 'final_dx',
+    medicalBackground: 'medical_background',
+    surgicalBackground: 'surgical_background',
+    interventionismTx: 'interventionism_tx',
+    painType: 'pain_type',
+    painLocalization: 'pain_localization',
+    painEvolution: 'pain_evolution',
+    painDuration: 'pain_duration',
+    painInitialState: 'pain_initial_state',
+    painCurrentState: 'pain_current_state',
+    alergies: 'alergies',
+    irradiations: 'irradiations',
+    evaluation: 'evaluation',
+    evera: 'evera',
+    previousTx: 'previous_tx',
+    bloodType: 'blood_type',
+    rhFactor: 'rh_factor',
+    weight: 'weight',
+    height: 'height',
+    bloodPressure: 'blood_pressure',
+    heartRate: 'heart_rate',
+    breathRate: 'breath_rate',
+    generalInspection: 'general_inspection',
+    head: 'head',
+    abdomen: 'abdomen',
+    neck: 'neck',
+    extremities: 'extremities',
+    spine: 'spine',
+    chest: 'chest',
+    laboratory: 'laboratory',
+    cabinet: 'cabinet',
+    consultations: 'consultations',
+    requestedStudies: 'requested_studies',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    anticoagulants: 'anticoagulants',
+    cellphoneNumber: 'cellphone_number',
+    chronics: 'chronics',
+    fiscalSituation: 'fiscal_situation',
+    email: 'email',
+    zipCode: 'zip_code',
+    rx: 'rx',
+    cat: 'cat',
+    mri: 'mri',
+    us: 'us',
+    do: 'do',
+    emg: 'emg',
+    spo2: 'spo2',
+    increasesWith: 'increases_with',
+    decreasesWith: 'decreases_with',
+    cellphoneNumberTwo: 'cellphone_number_two',
+    cellphoneNumberThree: 'cellphone_number_three',
+  };
+
+  const transformed: any = {};
+  // Use the exact column order from reference CSV
+  const columnOrder = [
+    'id', 'name', 'birth_date', 'city', 'address', 'phone_number', 'medical_record',
+    'registered_at', 'gender', 'marital_status', 'reference', 'occupations', 'primary_dx',
+    'initial_dx', 'final_dx', 'medical_background', 'surgical_background', 'interventionism_tx',
+    'pain_type', 'pain_localization', 'pain_evolution', 'pain_duration', 'pain_initial_state',
+    'pain_current_state', 'alergies', 'irradiations', 'evaluation', 'evera', 'previous_tx',
+    'blood_type', 'rh_factor', 'weight', 'height', 'blood_pressure', 'heart_rate', 'breath_rate',
+    'general_inspection', 'head', 'abdomen', 'neck', 'extremities', 'spine', 'chest',
+    'laboratory', 'cabinet', 'consultations', 'requested_studies', 'created_at', 'updated_at',
+    'anticoagulants', 'cellphone_number', 'chronics', 'fiscal_situation', 'email', 'zip_code',
+    'rx', 'cat', 'mri', 'us', 'do', 'emg', 'spo2', 'increases_with', 'decreases_with',
+    'cellphone_number_two', 'cellphone_number_three'
+  ];
+
+  for (const snakeKey of columnOrder) {
+    const camelKey = Object.keys(mapping).find(k => mapping[k] === snakeKey);
+    if (camelKey && patient.hasOwnProperty(camelKey)) {
+      transformed[snakeKey] = patient[camelKey];
+    } else {
+      transformed[snakeKey] = null;
+    }
+  }
+
+  return transformed;
+}
+
+// Transform consultation data to snake_case matching reference CSV format
+function transformConsultationForExport(consultation: any): any {
+  return {
+    id: consultation.id,
+    patient_id: consultation.patientId,
+    procedure: consultation.procedure,
+    meds: consultation.meds,
+    date: consultation.date,
+    created_at: consultation.createdAt,
+    updated_at: consultation.updatedAt,
+  };
+}
+
 // IPC Handlers
 export async function setupIpcHandlers(dbModule: any) {
   const { patientQueries, consultationQueries, default: prisma } = dbModule;
@@ -277,8 +390,12 @@ export async function setupIpcHandlers(dbModule: any) {
       const patients = await patientQueries.all();
       const allConsultations = await consultationQueries.all();
 
-      const patientsCsv = stringify(patients, { header: true });
-      const consultationsCsv = stringify(allConsultations, { header: true });
+      // Transform to snake_case matching reference format
+      const transformedPatients = patients.map(transformPatientForExport);
+      const transformedConsultations = allConsultations.map(transformConsultationForExport);
+
+      const patientsCsv = stringify(transformedPatients, { header: true });
+      const consultationsCsv = stringify(transformedConsultations, { header: true });
 
       const zip = new JSZip();
       const today = new Date().toISOString().split('T')[0];
