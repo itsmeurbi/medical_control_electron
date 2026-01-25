@@ -129,3 +129,19 @@ The database is automatically created and initialized on first run using Prisma 
 The application includes a native macOS menu with:
 - **File** -> **Export Data** (Cmd+E) - Exports patient and consultation data to CSV/ZIP
 - Standard macOS app menu items
+
+## Installation Notes
+
+### macOS Users
+
+Since this app is not code-signed, macOS Gatekeeper may show a "damaged" error when first opening. To fix this, open Terminal and run:
+
+```bash
+xattr -cr "/Applications/Medical Control.app"
+```
+
+This removes the quarantine attribute that macOS adds to downloaded files. Replace the path if you installed the app in a different location.
+
+### Updates
+
+The app includes an automatic update checker. Use **Ayuda -> Buscar actualizaciones** to check for new versions.

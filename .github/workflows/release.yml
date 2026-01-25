@@ -1,0 +1,123 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers on tags starting with 'v'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Extract version from tag
+        id: tag_version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Tag version: $VERSION"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Prepare database template
+        run: node scripts/prepare-db.js
+
+      - name: Build TypeScript
+        run: npx tsc
+
+      - name: Build Vite
+        run: npx vite build
+
+      - name: Build Electron app for macOS
+        run: |
+          npx electron-builder --mac --arm64 --x64 --config electron-builder.json5 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: List build outputs
+        shell: bash
+        run: |
+          echo "Checking for build artifacts..."
+          find . -name "*.dmg" -o -name "*.exe" -o -name "*.AppImage" 2>/dev/null | head -20
+          ls -la release/ 2>/dev/null || echo "No release directory"
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build
+          path: |
+            release/**/*.dmg
+            release/**/*.zip
+          if-no-files-found: warn
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: tag_version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Creating release for version: $VERSION"
+
+      - name: Download macOS artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build
+          path: artifacts
+          if-no-files-found: ignore
+
+      - name: List artifacts to upload
+        shell: bash
+        run: |
+          echo "Artifacts to upload:"
+          find artifacts -type f -name "*.dmg" 2>/dev/null || echo "No DMG found"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release v${{ steps.tag_version.outputs.VERSION }}
+          body: |
+            ## Release v${{ steps.tag_version.outputs.VERSION }}
+
+            ### Installation
+
+            #### macOS Users (Important!)
+
+            Since this app is not code-signed, macOS may show a "damaged" error. To fix this, open Terminal and run:
+
+            ```bash
+            xattr -cr "/Applications/Medical Control.app"
+            ```
+
+            This removes the quarantine attribute that macOS adds to downloaded files. Replace the path if you installed the app in a different location.
+
+            After installing, check for updates using **Ayuda -> Buscar actualizaciones** in the application.
+          files: |
+            artifacts/**/*.dmg
+          draft: false
+          prerelease: false

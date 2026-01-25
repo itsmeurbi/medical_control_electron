@@ -19,10 +19,13 @@ try {
   // Read the original config
   let config = fs.readFileSync(configPath, 'utf8');
 
+  // Normalize path for SQLite URL - use forward slashes (works on all platforms)
+  const normalizedPath = templateDbPath.replace(/\\/g, '/');
+  
   // Replace the datasource URL with our template path
   config = config.replace(
     /url:\s*['"][^'"]+['"]/,
-    `url: 'file:${templateDbPath}'`
+    `url: 'file:${normalizedPath}'`
   );
 
   // Write temporary config
@@ -32,8 +35,13 @@ try {
   console.log('Target path:', templateDbPath);
 
   // Push the schema to create the database using the temp config
-  execSync(`npx prisma db push --accept-data-loss --config=${tempConfigPath}`, {
-    stdio: 'inherit'
+  // Use quotes around the config path to handle Windows paths with spaces
+  const configArg = process.platform === 'win32' 
+    ? `"${tempConfigPath}"` 
+    : tempConfigPath;
+  execSync(`npx prisma db push --accept-data-loss --config=${configArg}`, {
+    stdio: 'inherit',
+    shell: true
   });
 
   // Clean up temp config
