@@ -38,6 +38,7 @@ interface Window {
       delete: (id: string | number) => Promise<any>;
       export: () => Promise<Buffer>;
       import: () => Promise<{ success: boolean; importedPatients: number; importedConsultations: number; errors?: string[]; message?: string }>;
+      recent: (limit?: number) => Promise<any[]>;
     };
     consultations: {
       list: (params: { patient_id: string; page?: string }) => Promise<any>;
@@ -45,6 +46,13 @@ interface Window {
       create: (data: any) => Promise<any>;
       update: (id: string | number, data: any) => Promise<any>;
       delete: (id: string | number) => Promise<any>;
+    };
+    statistics: {
+      get: () => Promise<{
+        totalPatients: number;
+        totalConsultations: number;
+        recentRegistrations: number;
+      }>;
     };
     advanceSearch: (params: any) => Promise<any>;
   };

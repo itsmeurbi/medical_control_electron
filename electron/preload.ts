@@ -27,6 +27,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     delete: (id: string | number) => ipcRenderer.invoke('api:patients:delete', id),
     export: () => ipcRenderer.invoke('api:patients:export'),
     import: () => ipcRenderer.invoke('api:patients:import'),
+    recent: (limit?: number) => ipcRenderer.invoke('api:patients:recent', limit),
+  },
+
+  // Statistics API
+  statistics: {
+    get: () => ipcRenderer.invoke('api:statistics'),
   },
 
   // Consultations API

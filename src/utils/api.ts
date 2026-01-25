@@ -70,6 +70,12 @@ async function ipcFetch(method: string, path: string, body?: any): Promise<Respo
         match_type: url.searchParams.get('match_type') || 'exact',
         page: parseInt(url.searchParams.get('page') || '1', 10),
       });
+    } else if (path === '/api/statistics') {
+      result = await window.electronAPI.statistics.get();
+    } else if (path.startsWith('/api/patients/recent')) {
+      const url = new URL(path, 'http://localhost');
+      const limit = parseInt(url.searchParams.get('limit') || '10', 10);
+      result = await window.electronAPI.patients.recent(limit);
     }
 
     // Convert result to Response-like object

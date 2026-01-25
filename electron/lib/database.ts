@@ -151,6 +151,31 @@ export const patientQueries = {
       take: 10,
     });
   },
+
+  count: async () => {
+    return prisma.patient.count();
+  },
+
+  recent: async (limit: number = 10) => {
+    return prisma.patient.findMany({
+      orderBy: { registeredAt: 'desc' },
+      take: limit,
+    });
+  },
+
+  countRecent: async (days: number = 30) => {
+    const date = new Date();
+    date.setDate(date.getDate() - days);
+    const startDate = date.toISOString();
+    
+    return prisma.patient.count({
+      where: {
+        registeredAt: {
+          gte: startDate,
+        },
+      },
+    });
+  },
 };
 
 // Consultation queries
@@ -231,6 +256,10 @@ export const consultationQueries = {
     return prisma.consultation.delete({
       where: { id },
     });
+  },
+
+  count: async () => {
+    return prisma.consultation.count();
   },
 };
 

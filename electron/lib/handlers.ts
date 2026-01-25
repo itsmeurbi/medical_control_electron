@@ -924,4 +924,39 @@ export async function setupIpcHandlers(dbModule: any) {
       throw error;
     }
   });
+
+  // GET /api/statistics
+  ipcMain.handle('api:statistics', async () => {
+    try {
+      const [totalPatients, totalConsultations, recentRegistrations] = await Promise.all([
+        patientQueries.count(),
+        consultationQueries.count(),
+        patientQueries.countRecent(30), // Last 30 days
+      ]);
+
+      return {
+        totalPatients,
+        totalConsultations,
+        recentRegistrations,
+      };
+    } catch (error) {
+      console.error('Error fetching statistics:', error);
+      throw error;
+    }
+  });
+
+  // GET /api/patients/recent
+  ipcMain.handle('api:patients:recent', async (_event, limit: number = 10) => {
+    try {
+      const patients = await patientQueries.recent(limit);
+      return patients.map((patient: any) => ({
+        ...patient,
+        age: calculateAge(patient.birthDate),
+        medical_record: patient.medicalRecord || (patient.id ? generateMedicalRecord(patient.id) : null)
+      }));
+    } catch (error) {
+      console.error('Error fetching recent patients:', error);
+      throw error;
+    }
+  });
 }
