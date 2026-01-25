@@ -1,4 +1,5 @@
-import { app, Menu, BrowserWindow } from 'electron';
+import { app, Menu, BrowserWindow, dialog } from 'electron';
+import path from 'path';
 
 /**
  * Creates and sets the application menu
@@ -33,6 +34,56 @@ export function createMenu(mainWindow: BrowserWindow) {
           accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
           click: () => {
             app.quit();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Ayuda',
+      submenu: [
+        {
+          label: 'Cómo exportar datos',
+          click: () => {
+            if (mainWindow) {
+              dialog.showMessageBox(mainWindow, {
+                type: 'info',
+                title: 'Cómo exportar datos',
+                message: 'Exportar datos',
+                detail: 'Tus datos se exportan en formato CSV para su comprensión. El archivo exportado contiene todos los pacientes y consultas registrados en el sistema.',
+                buttons: ['Entendido']
+              });
+            }
+          }
+        },
+        {
+          label: 'Cómo importar datos',
+          click: () => {
+            if (mainWindow) {
+              dialog.showMessageBox(mainWindow, {
+                type: 'info',
+                title: 'Cómo importar datos',
+                message: 'Importar datos',
+                detail: 'Importar datos puede sobreescribir registros que sean encontrados como duplicados. Los archivos deben comenzar con "patients" o "consults" respectivamente.\n\nEjemplos:\n- patients.csv\n- consults.csv\n\nLos archivos deben estar en formato CSV con las columnas correspondientes.',
+                buttons: ['Entendido']
+              });
+            }
+          }
+        },
+        {
+          label: 'Ubicación de la base de datos',
+          click: () => {
+            if (mainWindow) {
+              const userDataPath = app.getPath('userData');
+              const dbPath = path.join(userDataPath, 'database', 'medical_control.db');
+
+              dialog.showMessageBox(mainWindow, {
+                type: 'warning',
+                title: 'Ubicación de la base de datos',
+                message: 'Ubicación de la base de datos',
+                detail: `La base de datos se encuentra en:\n\n${dbPath}\n\n⚠️ IMPORTANTE: No modifiques este archivo manualmente. Cualquier modificación directa puede corromper los datos y hacer que la aplicación deje de funcionar correctamente.\n\nSi necesitas hacer una copia de seguridad, usa la función de exportar datos desde el menú.`,
+                buttons: ['Entendido']
+              });
+            }
           }
         }
       ]

@@ -233,9 +233,8 @@ export default function Home() {
             <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Registros Recientes</p>
+                  <p className="text-sm font-medium text-slate-600">Registros Recientes(últimos 30 días)</p>
                   <p className="mt-2 text-3xl font-bold text-slate-900">{statistics.recentRegistrations}</p>
-                  <p className="mt-1 text-xs text-slate-500">Últimos 30 días</p>
                 </div>
                 <div className="rounded-full bg-purple-100 p-3">
                   <svg className="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
