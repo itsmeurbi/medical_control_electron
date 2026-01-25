@@ -1,8 +1,9 @@
 {
-  "name": "medical-control-electron",
-  "version": "0.1.0",
+  "name": "medical-control",
+  "version": "1.0.0",
   "private": true,
   "main": "dist-electron/main.js",
+  "productName": "Medical Control",
   "type": "module",
   "scripts": {
     "dev": "vite",
