@@ -77,14 +77,14 @@ export default function Home() {
       });
       const result = await response.json();
       if (result.success) {
-        alert(`Import completed!\nPatients: ${result.importedPatients}\nConsultations: ${result.importedConsultations}${result.errors ? `\n\nErrors:\n${result.errors.join('\n')}` : ''}`);
+        alert(`Importacion completada!\nPacientes: ${result.importedPatients}\nConsultas: ${result.importedConsultations}${result.errors ? `\n\nErrores:\n${result.errors.join('\n')}` : ''}`);
         // Optionally refresh the page or reload data
         window.location.reload();
       } else {
-        alert(`Import failed: ${result.message || 'Unknown error'}`);
+        alert(`Error al importar: ${result.message || 'Error desconocido'}`);
       }
     } catch (error: any) {
-      alert(`Error importing data: ${error.message}`);
+      alert(`Error al importar datos: ${error.message}`);
     }
   };
 
@@ -247,8 +247,54 @@ export default function Home() {
           </div>
         )}
 
+        {/* Empty State - Encourage Import */}
+        {!loading && statistics && statistics.totalPatients === 0 && (
+          <div className="rounded-2xl border border-slate-200 bg-white/80 p-12 shadow-sm">
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className="rounded-full bg-blue-100 p-4 mb-4">
+                <svg
+                  className="h-12 w-12 text-blue-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-xl font-semibold text-slate-900 mb-2">No hay pacientes registrados</h2>
+              <p className="text-slate-600 mb-6 max-w-md">
+                Comienza importando tus datos existentes. Puedes importar pacientes y consultas desde un archivo CSV.
+              </p>
+              <button
+                onClick={handleImport}
+                className="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100 cursor-pointer"
+              >
+                <svg
+                  className="mr-2 h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                Importar Datos
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Recent Patients List */}
-        {!loading && recentPatients.length > 0 && (
+        {!loading && statistics && statistics.totalPatients > 0 && recentPatients.length > 0 && (
           <div className="rounded-2xl border border-slate-200 bg-white/80 p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-slate-900">Pacientes Recientes</h2>

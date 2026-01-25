@@ -10,7 +10,7 @@ export function createMenu(mainWindow: BrowserWindow) {
       label: 'File',
       submenu: [
         {
-          label: 'Import Data',
+          label: 'Importar datos',
           accelerator: process.platform === 'darwin' ? 'Cmd+I' : 'Ctrl+I',
           click: () => {
             if (mainWindow) {
@@ -19,7 +19,7 @@ export function createMenu(mainWindow: BrowserWindow) {
           }
         },
         {
-          label: 'Export Data',
+          label: 'Exportar datos',
           accelerator: process.platform === 'darwin' ? 'Cmd+E' : 'Ctrl+E',
           click: () => {
             if (mainWindow) {
@@ -29,7 +29,7 @@ export function createMenu(mainWindow: BrowserWindow) {
         },
         { type: 'separator' },
         {
-          label: process.platform === 'darwin' ? 'Quit' : 'Exit',
+          label: process.platform === 'darwin' ? 'Salir' : 'Salir',
           accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
           click: () => {
             app.quit();

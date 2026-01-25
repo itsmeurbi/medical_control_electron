@@ -521,16 +521,16 @@ export async function setupIpcHandlers(dbModule: any) {
 
       // Open file dialog to select CSV files
       const result = await dialog.showOpenDialog(mainWindow, {
-        title: 'Import Data',
+        title: 'Importar datos',
         filters: [
-          { name: 'CSV Files', extensions: ['csv'] },
-          { name: 'All Files', extensions: ['*'] }
+          { name: 'Archivos CSV', extensions: ['csv'] },
+          { name: 'Todos los archivos', extensions: ['*'] }
         ],
         properties: ['openFile', 'multiSelections']
       });
 
       if (result.canceled || result.filePaths.length === 0) {
-        return { success: false, message: 'Import cancelled' };
+        return { success: false, message: 'Importacion cancelada' };
       }
 
       let patientsFile: string | null = null;
@@ -563,10 +563,10 @@ export async function setupIpcHandlers(dbModule: any) {
           for (const record of records) {
             try {
               const patientData = transformPatientForImport(record);
-              
+
               // Get the original ID from CSV if present
               const csvId = patientData.id ? (typeof patientData.id === 'string' ? parseInt(patientData.id, 10) : patientData.id) : null;
-              
+
               // Remove fields that shouldn't be in create/update
               const {
                 id: _id,
@@ -575,7 +575,7 @@ export async function setupIpcHandlers(dbModule: any) {
                 medical_record: _medical_record,
                 ...dataToImport
               } = patientData;
-              
+
               // Ensure required fields
               if (!dataToImport.name || !dataToImport.registeredAt || dataToImport.gender === undefined || dataToImport.gender === null || dataToImport.gender === '') {
                 errors.push(`Skipping patient "${dataToImport.name || 'unknown'}": missing required fields (name, registeredAt, or gender)`);
@@ -632,7 +632,7 @@ export async function setupIpcHandlers(dbModule: any) {
                   existingPatient = null; // ID matches but name doesn't, treat as new
                 }
               }
-              
+
               // If not found by ID, check by name
               if (!existingPatient) {
                 const patientsByName = await prisma.patient.findMany({
@@ -684,7 +684,7 @@ export async function setupIpcHandlers(dbModule: any) {
           for (const record of records) {
             try {
               const consultationData = transformConsultationForImport(record);
-              
+
               // Remove fields that shouldn't be in create
               const {
                 id: _id,
@@ -700,10 +700,10 @@ export async function setupIpcHandlers(dbModule: any) {
               }
 
               // Convert patientId to number (CSV reads it as string)
-              const patientId = typeof dataToImport.patientId === 'string' 
-                ? parseInt(dataToImport.patientId, 10) 
+              const patientId = typeof dataToImport.patientId === 'string'
+                ? parseInt(dataToImport.patientId, 10)
                 : dataToImport.patientId;
-              
+
               if (isNaN(patientId)) {
                 errors.push(`Skipping consultation: invalid patient_id "${dataToImport.patientId}"`);
                 continue;
