@@ -27,6 +27,8 @@ interface Window {
   electronAPI: {
     onExportData: (callback: (event: any, ...args: any[]) => void) => void;
     removeExportListener: () => void;
+    onImportData: (callback: (event: any, ...args: any[]) => void) => void;
+    removeImportListener: () => void;
     patients: {
       list: () => Promise<any[]>;
       search: (text: string) => Promise<any[]>;
@@ -35,6 +37,7 @@ interface Window {
       update: (id: string | number, data: any) => Promise<any>;
       delete: (id: string | number) => Promise<any>;
       export: () => Promise<Buffer>;
+      import: () => Promise<{ success: boolean; importedPatients: number; importedConsultations: number; errors?: string[]; message?: string }>;
     };
     consultations: {
       list: (params: { patient_id: string; page?: string }) => Promise<any>;

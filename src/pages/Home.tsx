@@ -61,13 +61,33 @@ export default function Home() {
     await fetch(apiUrl('/api/patients/export'));
   };
 
-  // Listen for native menu export event
+  const handleImport = async () => {
+    try {
+      const response = await fetch(apiUrl('/api/patients/import'), {
+        method: 'POST',
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert(`Import completed!\nPatients: ${result.importedPatients}\nConsultations: ${result.importedConsultations}${result.errors ? `\n\nErrors:\n${result.errors.join('\n')}` : ''}`);
+        // Optionally refresh the page or reload data
+        window.location.reload();
+      } else {
+        alert(`Import failed: ${result.message || 'Unknown error'}`);
+      }
+    } catch (error: any) {
+      alert(`Error importing data: ${error.message}`);
+    }
+  };
+
+  // Listen for native menu export/import events
   useEffect(() => {
     if (window.electronAPI) {
       window.electronAPI.onExportData(handleExport);
+      window.electronAPI.onImportData(handleImport);
 
       return () => {
         window.electronAPI?.removeExportListener();
+        window.electronAPI?.removeImportListener();
       };
     }
   }, []);

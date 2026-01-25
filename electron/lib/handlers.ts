@@ -1,5 +1,7 @@
-import { ipcMain } from 'electron';
+import { ipcMain, dialog, BrowserWindow } from 'electron';
 import { createRequire } from 'node:module';
+import fs from 'fs';
+import path from 'path';
 
 const require = createRequire(import.meta.url);
 
@@ -127,6 +129,103 @@ function transformConsultationForExport(consultation: any): any {
     date: consultation.date,
     created_at: consultation.createdAt,
     updated_at: consultation.updatedAt,
+  };
+}
+
+// Convert snake_case back to camelCase for import
+function snakeToCamel(str: string): string {
+  return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+}
+
+// Transform patient data from snake_case to camelCase for import
+function transformPatientForImport(patient: any): any {
+  const mapping: Record<string, string> = {
+    id: 'id',
+    name: 'name',
+    birth_date: 'birthDate',
+    city: 'city',
+    address: 'address',
+    phone_number: 'phoneNumber',
+    medical_record: 'medicalRecord',
+    registered_at: 'registeredAt',
+    gender: 'gender',
+    marital_status: 'maritalStatus',
+    reference: 'reference',
+    occupations: 'occupations',
+    primary_dx: 'primaryDx',
+    initial_dx: 'initialDx',
+    final_dx: 'finalDx',
+    medical_background: 'medicalBackground',
+    surgical_background: 'surgicalBackground',
+    interventionism_tx: 'interventionismTx',
+    pain_type: 'painType',
+    pain_localization: 'painLocalization',
+    pain_evolution: 'painEvolution',
+    pain_duration: 'painDuration',
+    pain_initial_state: 'painInitialState',
+    pain_current_state: 'painCurrentState',
+    alergies: 'alergies',
+    irradiations: 'irradiations',
+    evaluation: 'evaluation',
+    evera: 'evera',
+    previous_tx: 'previousTx',
+    blood_type: 'bloodType',
+    rh_factor: 'rhFactor',
+    weight: 'weight',
+    height: 'height',
+    blood_pressure: 'bloodPressure',
+    heart_rate: 'heartRate',
+    breath_rate: 'breathRate',
+    general_inspection: 'generalInspection',
+    head: 'head',
+    abdomen: 'abdomen',
+    neck: 'neck',
+    extremities: 'extremities',
+    spine: 'spine',
+    chest: 'chest',
+    laboratory: 'laboratory',
+    cabinet: 'cabinet',
+    consultations: 'consultations',
+    requested_studies: 'requestedStudies',
+    created_at: 'createdAt',
+    updated_at: 'updatedAt',
+    anticoagulants: 'anticoagulants',
+    cellphone_number: 'cellphoneNumber',
+    chronics: 'chronics',
+    fiscal_situation: 'fiscalSituation',
+    email: 'email',
+    zip_code: 'zipCode',
+    rx: 'rx',
+    cat: 'cat',
+    mri: 'mri',
+    us: 'us',
+    do: 'do',
+    emg: 'emg',
+    spo2: 'spo2',
+    increases_with: 'increasesWith',
+    decreases_with: 'decreasesWith',
+    cellphone_number_two: 'cellphoneNumberTwo',
+    cellphone_number_three: 'cellphoneNumberThree',
+  };
+
+  const transformed: any = {};
+  for (const [snakeKey, value] of Object.entries(patient)) {
+    const camelKey = mapping[snakeKey] || snakeToCamel(snakeKey);
+    transformed[camelKey] = value === '' ? null : value;
+  }
+  return transformed;
+}
+
+// Transform consultation data from snake_case to camelCase for import
+function transformConsultationForImport(consultation: any): any {
+  return {
+    id: consultation.id,
+    patientId: consultation.patient_id,
+    procedure: consultation.procedure === '' ? null : consultation.procedure,
+    meds: consultation.meds === '' ? null : consultation.meds,
+    date: consultation.date,
+    createdAt: consultation.created_at,
+    updatedAt: consultation.updated_at,
   };
 }
 
@@ -406,6 +505,255 @@ export async function setupIpcHandlers(dbModule: any) {
       return zipBuffer;
     } catch (error) {
       console.error('Error exporting data:', error);
+      throw error;
+    }
+  });
+
+  // POST /api/patients/import
+  ipcMain.handle('api:patients:import', async (_event) => {
+    try {
+      const { parse } = require('csv-parse/sync');
+      const mainWindow = BrowserWindow.getAllWindows()[0];
+
+      if (!mainWindow) {
+        throw new Error('No main window available');
+      }
+
+      // Open file dialog to select CSV files
+      const result = await dialog.showOpenDialog(mainWindow, {
+        title: 'Import Data',
+        filters: [
+          { name: 'CSV Files', extensions: ['csv'] },
+          { name: 'All Files', extensions: ['*'] }
+        ],
+        properties: ['openFile', 'multiSelections']
+      });
+
+      if (result.canceled || result.filePaths.length === 0) {
+        return { success: false, message: 'Import cancelled' };
+      }
+
+      let patientsFile: string | null = null;
+      let consultationsFile: string | null = null;
+
+      // Find patients and consultations files
+      for (const filePath of result.filePaths) {
+        const fileName = path.basename(filePath).toLowerCase();
+        if (fileName.startsWith('patients')) {
+          patientsFile = filePath;
+        } else if (fileName.startsWith('consults')) {
+          consultationsFile = filePath;
+        }
+      }
+
+      let importedPatients = 0;
+      let importedConsultations = 0;
+      const errors: string[] = [];
+
+      // Import patients
+      if (patientsFile) {
+        try {
+          const fileContent = fs.readFileSync(patientsFile, 'utf-8');
+          const records = parse(fileContent, {
+            columns: true,
+            skip_empty_lines: true,
+            trim: true,
+          });
+
+          for (const record of records) {
+            try {
+              const patientData = transformPatientForImport(record);
+              
+              // Get the original ID from CSV if present
+              const csvId = patientData.id ? (typeof patientData.id === 'string' ? parseInt(patientData.id, 10) : patientData.id) : null;
+              
+              // Remove fields that shouldn't be in create/update
+              const {
+                id: _id,
+                treatments: _treatments,
+                age: _age,
+                medical_record: _medical_record,
+                ...dataToImport
+              } = patientData;
+              
+              // Ensure required fields
+              if (!dataToImport.name || !dataToImport.registeredAt || dataToImport.gender === undefined || dataToImport.gender === null || dataToImport.gender === '') {
+                errors.push(`Skipping patient "${dataToImport.name || 'unknown'}": missing required fields (name, registeredAt, or gender)`);
+                continue;
+              }
+
+              // Convert date strings to ISO format if needed
+              if (dataToImport.registeredAt && typeof dataToImport.registeredAt === 'string' && !dataToImport.registeredAt.includes('T')) {
+                try {
+                  dataToImport.registeredAt = new Date(dataToImport.registeredAt).toISOString();
+                } catch (e) {
+                  errors.push(`Skipping patient "${dataToImport.name}": invalid registeredAt date format`);
+                  continue;
+                }
+              }
+              if (dataToImport.birthDate && typeof dataToImport.birthDate === 'string' && dataToImport.birthDate !== '' && !dataToImport.birthDate.includes('T')) {
+                try {
+                  dataToImport.birthDate = new Date(dataToImport.birthDate).toISOString();
+                } catch (e) {
+                  dataToImport.birthDate = null;
+                }
+              }
+
+              // Convert boolean strings to actual booleans
+              const booleanFields = ['rx', 'cat', 'mri', 'us', 'do', 'emg'];
+              for (const field of booleanFields) {
+                if (dataToImport[field] !== undefined && dataToImport[field] !== null) {
+                  if (typeof dataToImport[field] === 'string') {
+                    dataToImport[field] = dataToImport[field].toLowerCase() === 'true' || dataToImport[field] === '1';
+                  }
+                }
+              }
+
+              // Convert numeric fields
+              const numericFields = ['maritalStatus', 'evaluation', 'evera', 'bloodType', 'rhFactor', 'weight', 'height', 'heartRate', 'breathRate'];
+              for (const field of numericFields) {
+                if (dataToImport[field] !== undefined && dataToImport[field] !== null && dataToImport[field] !== '') {
+                  const num = typeof dataToImport[field] === 'string' ? parseFloat(dataToImport[field]) : dataToImport[field];
+                  dataToImport[field] = isNaN(num) ? null : num;
+                } else {
+                  dataToImport[field] = null;
+                }
+              }
+
+              // Clean the data using the same function as create
+              const cleaned = cleanData(dataToImport);
+
+              // Check if patient already exists (by ID and name match)
+              let existingPatient = null;
+              if (csvId && !isNaN(csvId)) {
+                existingPatient = await patientQueries.findById(csvId);
+                // Verify name also matches
+                if (existingPatient && existingPatient.name !== dataToImport.name) {
+                  existingPatient = null; // ID matches but name doesn't, treat as new
+                }
+              }
+              
+              // If not found by ID, check by name
+              if (!existingPatient) {
+                const patientsByName = await prisma.patient.findMany({
+                  where: { name: dataToImport.name },
+                  take: 1,
+                });
+                if (patientsByName.length > 0) {
+                  existingPatient = patientsByName[0];
+                  // If CSV has ID, verify it matches
+                  if (csvId && existingPatient.id !== csvId) {
+                    existingPatient = null; // Name matches but ID doesn't, treat as new
+                  }
+                }
+              }
+
+              if (existingPatient) {
+                // Update existing patient
+                await patientQueries.update(existingPatient.id, cleaned);
+                importedPatients++;
+              } else {
+                // Create new patient
+                await patientQueries.create(cleaned);
+                importedPatients++;
+              }
+            } catch (error: any) {
+              const patientName = record.name || record.id || 'unknown';
+              const errorMsg = error.message || String(error);
+              // Extract the field name from Prisma errors if possible
+              const fieldMatch = errorMsg.match(/Argument `(\w+)`/);
+              const fieldInfo = fieldMatch ? ` (field: ${fieldMatch[1]})` : '';
+              errors.push(`Error importing patient "${patientName}"${fieldInfo}: ${errorMsg.substring(0, 200)}`);
+            }
+          }
+        } catch (error: any) {
+          errors.push(`Error reading patients file: ${error.message}`);
+        }
+      }
+
+      // Import consultations
+      if (consultationsFile) {
+        try {
+          const fileContent = fs.readFileSync(consultationsFile, 'utf-8');
+          const records = parse(fileContent, {
+            columns: true,
+            skip_empty_lines: true,
+            trim: true,
+          });
+
+          for (const record of records) {
+            try {
+              const consultationData = transformConsultationForImport(record);
+              
+              // Remove fields that shouldn't be in create
+              const {
+                id: _id,
+                createdAt: _createdAt,
+                updatedAt: _updatedAt,
+                ...dataToImport
+              } = consultationData;
+
+              // Ensure required fields
+              if (!dataToImport.patientId || !dataToImport.date) {
+                errors.push(`Skipping consultation: missing required fields (patient_id or date)`);
+                continue;
+              }
+
+              // Convert patientId to number (CSV reads it as string)
+              const patientId = typeof dataToImport.patientId === 'string' 
+                ? parseInt(dataToImport.patientId, 10) 
+                : dataToImport.patientId;
+              
+              if (isNaN(patientId)) {
+                errors.push(`Skipping consultation: invalid patient_id "${dataToImport.patientId}"`);
+                continue;
+              }
+
+              // Check if patient exists
+              const patient = await patientQueries.findById(patientId);
+              if (!patient) {
+                errors.push(`Skipping consultation: patient ID ${patientId} not found`);
+                continue;
+              }
+
+              // Update patientId to the converted number
+              dataToImport.patientId = patientId;
+
+              // Convert date string to ISO format if needed
+              if (dataToImport.date && typeof dataToImport.date === 'string' && !dataToImport.date.includes('T')) {
+                try {
+                  dataToImport.date = new Date(dataToImport.date).toISOString();
+                } catch (e) {
+                  errors.push(`Skipping consultation: invalid date format for patient ID ${dataToImport.patientId}`);
+                  continue;
+                }
+              }
+
+              // Clean the data (consultationQueries.create uses cleanData internally, but let's be explicit)
+              const cleaned = cleanData(dataToImport);
+
+              await consultationQueries.create(cleaned);
+              importedConsultations++;
+            } catch (error: any) {
+              const errorMsg = error.message || String(error);
+              const fieldMatch = errorMsg.match(/Argument `(\w+)`/);
+              const fieldInfo = fieldMatch ? ` (field: ${fieldMatch[1]})` : '';
+              errors.push(`Error importing consultation${fieldInfo}: ${errorMsg.substring(0, 200)}`);
+            }
+          }
+        } catch (error: any) {
+          errors.push(`Error reading consultations file: ${error.message}`);
+        }
+      }
+
+      return {
+        success: true,
+        importedPatients,
+        importedConsultations,
+        errors: errors.length > 0 ? errors : undefined,
+      };
+    } catch (error: any) {
+      console.error('Error importing data:', error);
       throw error;
     }
   });

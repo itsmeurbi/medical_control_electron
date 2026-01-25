@@ -10,6 +10,15 @@ export function createMenu(mainWindow: BrowserWindow) {
       label: 'File',
       submenu: [
         {
+          label: 'Import Data',
+          accelerator: process.platform === 'darwin' ? 'Cmd+I' : 'Ctrl+I',
+          click: () => {
+            if (mainWindow) {
+              mainWindow.webContents.send('import-data');
+            }
+          }
+        },
+        {
           label: 'Export Data',
           accelerator: process.platform === 'darwin' ? 'Cmd+E' : 'Ctrl+E',
           click: () => {

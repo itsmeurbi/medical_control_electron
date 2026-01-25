@@ -27,6 +27,10 @@ async function ipcFetch(method: string, path: string, body?: any): Promise<Respo
       const url = URL.createObjectURL(blob);
       window.location.href = url;
       return new Response(null, { status: 200 });
+    } else if (path.startsWith('/api/patients/import')) {
+      if (method === 'POST') {
+        result = await window.electronAPI.patients.import();
+      }
     } else if (path.match(/^\/api\/patients\/(\d+)$/)) {
       const match = path.match(/^\/api\/patients\/(\d+)$/);
       const id = match ? match[1] : '';

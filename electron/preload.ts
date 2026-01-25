@@ -9,6 +9,13 @@ contextBridge.exposeInMainWorld('electronAPI', {
   removeExportListener: () => {
     ipcRenderer.removeAllListeners('export-data');
   },
+  // Import data listener
+  onImportData: (callback: (event: any, ...args: any[]) => void) => {
+    ipcRenderer.on('import-data', callback);
+  },
+  removeImportListener: () => {
+    ipcRenderer.removeAllListeners('import-data');
+  },
 
   // Patients API
   patients: {
@@ -19,6 +26,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     update: (id: string | number, data: any) => ipcRenderer.invoke('api:patients:update', id, data),
     delete: (id: string | number) => ipcRenderer.invoke('api:patients:delete', id),
     export: () => ipcRenderer.invoke('api:patients:export'),
+    import: () => ipcRenderer.invoke('api:patients:import'),
   },
 
   // Consultations API
