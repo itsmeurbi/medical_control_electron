@@ -65,4 +65,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getLoginItem: () => ipcRenderer.invoke('api:app-settings:get-login-item') as Promise<{ openAtLogin: boolean }>,
     setLoginItem: (settings: { openAtLogin: boolean }) => ipcRenderer.invoke('api:app-settings:set-login-item', settings) as Promise<{ success: boolean }>,
   },
+
+  // Logger API
+  logNavigation: (from: string, to: string) => {
+    ipcRenderer.send('log:navigation', { from, to });
+  },
 });

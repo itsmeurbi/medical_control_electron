@@ -2,6 +2,7 @@ import { app, Menu, BrowserWindow, dialog, shell } from 'electron';
 import path from 'path';
 import https from 'https';
 import { readFileSync } from 'fs';
+import { logError, logInfo } from './lib/logger';
 
 /**
  * Gets the current app version from package.json
@@ -167,8 +168,13 @@ export function createMenu(mainWindow: BrowserWindow): void {
           label: 'Importar datos',
           accelerator: process.platform === 'darwin' ? 'Cmd+I' : 'Ctrl+I',
           click: () => {
-            if (mainWindow) {
-              mainWindow.webContents.send('import-data');
+            try {
+              if (mainWindow) {
+                logInfo('Menu: Importar datos clicked');
+                mainWindow.webContents.send('import-data');
+              }
+            } catch (error) {
+              logError('Error in menu: Importar datos', error, 'menu-import');
             }
           }
         },
@@ -176,8 +182,13 @@ export function createMenu(mainWindow: BrowserWindow): void {
           label: 'Exportar datos',
           accelerator: process.platform === 'darwin' ? 'Cmd+E' : 'Ctrl+E',
           click: () => {
-            if (mainWindow) {
-              mainWindow.webContents.send('export-data');
+            try {
+              if (mainWindow) {
+                logInfo('Menu: Exportar datos clicked');
+                mainWindow.webContents.send('export-data');
+              }
+            } catch (error) {
+              logError('Error in menu: Exportar datos', error, 'menu-export');
             }
           }
         },
@@ -199,14 +210,19 @@ export function createMenu(mainWindow: BrowserWindow): void {
           type: 'checkbox',
           checked: app.getLoginItemSettings().openAtLogin,
           click: () => {
-            const currentSettings = app.getLoginItemSettings();
-            const newValue = !currentSettings.openAtLogin;
-            app.setLoginItemSettings({
-              openAtLogin: newValue,
-              openAsHidden: false,
-            });
-            // Rebuild menu to reflect the change
-            createMenu(mainWindow);
+            try {
+              const currentSettings = app.getLoginItemSettings();
+              const newValue = !currentSettings.openAtLogin;
+              app.setLoginItemSettings({
+                openAtLogin: newValue,
+                openAsHidden: false,
+              });
+              logInfo(`Menu: Toggle auto-launch to ${newValue}`);
+              // Rebuild menu to reflect the change
+              createMenu(mainWindow);
+            } catch (error) {
+              logError('Error in menu: Toggle auto-launch', error, 'menu-auto-launch');
+            }
           }
         }
       ]
@@ -217,8 +233,13 @@ export function createMenu(mainWindow: BrowserWindow): void {
         {
           label: 'Buscar actualizaciones',
           click: () => {
-            if (mainWindow) {
-              checkForUpdates(mainWindow);
+            try {
+              if (mainWindow) {
+                logInfo('Menu: Buscar actualizaciones clicked');
+                checkForUpdates(mainWindow);
+              }
+            } catch (error) {
+              logError('Error in menu: Buscar actualizaciones', error, 'menu-check-updates');
             }
           }
         },

@@ -13,6 +13,7 @@ import {
   normalizeDateToISO,
 } from './utils';
 import { createDatabaseBackup } from '../database';
+import { logCRUD, logError } from '../logger';
 
 const require = createRequire(import.meta.url);
 
@@ -47,6 +48,7 @@ export function setupPatientHandlers(
   // GET /api/patients
   ipcMain.handle('api:patients:list', async () => {
     try {
+      logCRUD('READ', 'Patient', undefined, { operation: 'list' });
       const patients = await patientQueries.all();
       return patients.map((patient: Patient): PatientWithComputed => ({
         ...patient,
@@ -84,6 +86,7 @@ export function setupPatientHandlers(
       if (isNaN(patientId)) {
         throw new Error('Invalid patient ID');
       }
+      logCRUD('READ', 'Patient', patientId);
       const patient = await patientQueries.findById(patientId);
       if (!patient) {
         throw new Error('Patient not found');
@@ -106,6 +109,7 @@ export function setupPatientHandlers(
       if (!patientData.name || !patientData.registeredAt || patientData.gender === undefined) {
         throw new Error('Name, registeredAt, and gender are required');
       }
+      logCRUD('CREATE', 'Patient', undefined, { name: patientData.name });
 
       const treatment = patientData.treatment;
       const patientDataWithoutTreatment = omit(patientData as unknown as Record<string, unknown>, ['treatment']);
@@ -144,12 +148,15 @@ export function setupPatientHandlers(
         }
       }
 
-      return {
+      const result = {
         ...patient,
         age: calculateAge(patient.birthDate ?? null),
         medical_record: patient.medicalRecord || (patient.id ? generateMedicalRecord(patient.id) : null)
       };
+      logCRUD('CREATE', 'Patient', patient.id, { name: patient.name, success: true });
+      return result;
     } catch (error) {
+      logError('Error creating patient', error, 'api:patients:create');
       console.error('Error creating patient:', error);
       throw error;
     }
@@ -162,6 +169,7 @@ export function setupPatientHandlers(
       if (isNaN(patientId)) {
         throw new Error('Invalid patient ID');
       }
+      logCRUD('UPDATE', 'Patient', patientId, { name: patientData.name });
 
       const existingPatient = await patientQueries.findById(patientId);
       if (!existingPatient) {
@@ -210,12 +218,15 @@ export function setupPatientHandlers(
         }
       }
 
-      return {
+      const result = {
         ...updatedPatient,
         age: calculateAge(updatedPatient.birthDate ?? null),
         medical_record: updatedPatient.medicalRecord || (updatedPatient.id ? generateMedicalRecord(updatedPatient.id) : null)
       };
+      logCRUD('UPDATE', 'Patient', updatedPatient.id, { name: updatedPatient.name, success: true });
+      return result;
     } catch (error) {
+      logError('Error updating patient', error, 'api:patients:update');
       console.error('Error updating patient:', error);
       throw error;
     }
@@ -228,9 +239,12 @@ export function setupPatientHandlers(
       if (isNaN(patientId)) {
         throw new Error('Invalid patient ID');
       }
+      logCRUD('DELETE', 'Patient', patientId);
       await patientQueries.delete(patientId);
+      logCRUD('DELETE', 'Patient', patientId, { success: true });
       return { success: true };
     } catch (error) {
+      logError('Error deleting patient', error, 'api:patients:delete');
       console.error('Error deleting patient:', error);
       throw error;
     }

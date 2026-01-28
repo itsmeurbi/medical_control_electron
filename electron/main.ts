@@ -1,8 +1,9 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { createMenu } from './menu';
 import { setupIpcHandlers } from './lib/handlers';
+import { initializeLogger, logNavigation } from './lib/logger';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -23,7 +24,7 @@ let dbModule: any;
 // Initialize database
 async function initDatabase() {
   try {
-    process.env.USER_DATA_PATH = app.getPath('userData');
+    // USER_DATA_PATH is set in app.whenReady() before this is called
     dbModule = await import('./lib/database');
     // Reinitialize database with correct path after USER_DATA_PATH is set
     const { ensureDatabaseInitialized } = dbModule;
@@ -70,8 +71,17 @@ app.on('activate', () => {
 app.whenReady().then(async () => {
   console.log('=== Electron App Ready ===');
   try {
+    // Initialize logger first (clears log file)
+    process.env.USER_DATA_PATH = app.getPath('userData');
+    initializeLogger();
+
     await initDatabase();
     await setupIpcHandlers(dbModule);
+
+    // Setup navigation logging handler
+    ipcMain.on('log:navigation', (_event, { from, to }: { from: string; to: string }) => {
+      logNavigation(from, to);
+    });
 
     // Enable auto-launch on login by default (only if not already set)
     const loginItemSettings = app.getLoginItemSettings();

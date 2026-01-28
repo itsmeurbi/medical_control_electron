@@ -50,6 +50,7 @@ declare global {
         getLoginItem: () => Promise<{ openAtLogin: boolean }>;
         setLoginItem: (settings: { openAtLogin: boolean }) => Promise<{ success: boolean }>;
       };
+      logNavigation?: (from: string, to: string) => void;
     };
   }
 }

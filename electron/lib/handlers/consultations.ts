@@ -1,6 +1,7 @@
 import { ipcMain } from 'electron';
 import type { DatabaseModule, ConsultationListResponse, ConsultationCreateData, ConsultationUpdateData } from './types';
 import type { Consultation } from '../../../lib/types';
+import { logCRUD, logError } from '../logger';
 
 export function setupConsultationHandlers(dbModule: DatabaseModule): void {
   const { patientQueries, consultationQueries } = dbModule;
@@ -16,6 +17,7 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
       if (isNaN(patientId)) {
         throw new Error('Invalid patient_id');
       }
+      logCRUD('READ', 'Consultation', undefined, { patientId, operation: 'list', page });
 
       const pageNum = parseInt(page || '1', 10);
       const itemsPerPage = 1;
@@ -28,7 +30,7 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
 
       const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-      return {
+      const result = {
         consultations,
         pagination: {
           page: pageNum,
@@ -37,7 +39,10 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
           totalPages,
         },
       };
+      logCRUD('READ', 'Consultation', undefined, { patientId, success: true, count: consultations.length });
+      return result;
     } catch (error) {
+      logError('Error fetching consultations', error, 'api:consultations:list');
       console.error('Error fetching consultations:', error);
       throw error;
     }
@@ -54,13 +59,15 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
         throw new Error('Either procedure or meds must be provided');
       }
 
-      const patientIdStr = typeof consultationData.patient_id === 'number' 
-        ? consultationData.patient_id.toString() 
+      const patientIdStr = typeof consultationData.patient_id === 'number'
+        ? consultationData.patient_id.toString()
         : consultationData.patient_id;
       const patientId = parseInt(patientIdStr, 10);
       if (isNaN(patientId)) {
         throw new Error('Invalid patient_id');
       }
+
+      logCRUD('CREATE', 'Consultation', undefined, { patientId });
 
       const patient = await patientQueries.findById(patientId);
       if (!patient) {
@@ -74,8 +81,11 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
         meds: consultationData.meds || null,
       };
 
-      return await consultationQueries.create(data);
+      const result = await consultationQueries.create(data);
+      logCRUD('CREATE', 'Consultation', result.id, { patientId: result.patientId, success: true });
+      return result;
     } catch (error) {
+      logError('Error creating consultation', error, 'api:consultations:create');
       console.error('Error creating consultation:', error);
       throw error;
     }
@@ -88,12 +98,14 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
       if (isNaN(consultationId)) {
         throw new Error('Invalid consultation ID');
       }
+      logCRUD('READ', 'Consultation', consultationId);
       const consultation = await consultationQueries.findById(consultationId);
       if (!consultation) {
         throw new Error('Consultation not found');
       }
       return consultation;
     } catch (error) {
+      logError('Error fetching consultation', error, 'api:consultations:get');
       console.error('Error fetching consultation:', error);
       throw error;
     }
@@ -107,6 +119,7 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
         throw new Error('Invalid consultation ID');
       }
 
+      logCRUD('UPDATE', 'Consultation', consultationId);
       const existingConsultation = await consultationQueries.findById(consultationId);
       if (!existingConsultation) {
         throw new Error('Consultation not found');
@@ -118,8 +131,11 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
         meds: consultationData.meds !== undefined ? consultationData.meds : existingConsultation.meds,
       };
 
-      return await consultationQueries.update(consultationId, data);
+      const result = await consultationQueries.update(consultationId, data);
+      logCRUD('UPDATE', 'Consultation', consultationId, { success: true });
+      return result;
     } catch (error) {
+      logError('Error updating consultation', error, 'api:consultations:update');
       console.error('Error updating consultation:', error);
       throw error;
     }
@@ -132,9 +148,12 @@ export function setupConsultationHandlers(dbModule: DatabaseModule): void {
       if (isNaN(consultationId)) {
         throw new Error('Invalid consultation ID');
       }
+      logCRUD('DELETE', 'Consultation', consultationId);
       await consultationQueries.delete(consultationId);
+      logCRUD('DELETE', 'Consultation', consultationId, { success: true });
       return { success: true };
     } catch (error) {
+      logError('Error deleting consultation', error, 'api:consultations:delete');
       console.error('Error deleting consultation:', error);
       throw error;
     }
