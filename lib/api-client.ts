@@ -1,11 +1,14 @@
 // IPC-based API client for Electron
 // This replaces fetch() calls with IPC communication
 
-import { Patient, Consultation } from '../lib/types';
-
-
-type PatientData = Partial<Patient> & { treatment?: { date?: string; procedure?: string; meds?: string } };
-type ConsultationData = Partial<Consultation> & { patient_id?: number };
+import type {
+  PatientCreateData,
+  PatientUpdateData,
+  ConsultationCreateData,
+  ConsultationUpdateData,
+  AdvanceSearchParams,
+  MatchType,
+} from '../electron/lib/handlers/types';
 
 // Note: Type declaration is in src/utils/api.ts to avoid conflicts
 
@@ -38,7 +41,7 @@ export const apiClient = {
     return wrapInResponse(data);
   },
 
-  async createPatient(data: PatientData): Promise<Response> {
+  async createPatient(data: PatientCreateData): Promise<Response> {
     if (!window.electronAPI) {
       throw new Error('Electron API not available');
     }
@@ -46,7 +49,7 @@ export const apiClient = {
     return wrapInResponse(result);
   },
 
-  async updatePatient(id: number | string, data: PatientData): Promise<Response> {
+  async updatePatient(id: number | string, data: PatientUpdateData): Promise<Response> {
     if (!window.electronAPI) {
       throw new Error('Electron API not available');
     }
@@ -101,7 +104,7 @@ export const apiClient = {
     return wrapInResponse(data);
   },
 
-  async createConsultation(data: ConsultationData): Promise<Response> {
+  async createConsultation(data: ConsultationCreateData): Promise<Response> {
     if (!window.electronAPI) {
       throw new Error('Electron API not available');
     }
@@ -109,7 +112,7 @@ export const apiClient = {
     return wrapInResponse(result);
   },
 
-  async updateConsultation(id: number | string, data: Partial<Consultation>): Promise<Response> {
+  async updateConsultation(id: number | string, data: ConsultationUpdateData): Promise<Response> {
     if (!window.electronAPI) {
       throw new Error('Electron API not available');
     }
@@ -126,7 +129,7 @@ export const apiClient = {
   },
 
   // Advanced search
-  async advanceSearch(params: { attribute_name: string; attribute_value: string; match_type?: string; page?: number }): Promise<Response> {
+  async advanceSearch(params: AdvanceSearchParams): Promise<Response> {
     if (!window.electronAPI) {
       throw new Error('Electron API not available');
     }
@@ -248,10 +251,14 @@ async function handleElectronFetch(url: string, options?: RequestInit): Promise<
 
   // Advanced search
   if (pathname === '/api/advance-searches' || pathname === '/api/advance-searches/') {
-    const params = {
+    const matchTypeParam = urlObj.searchParams.get('match_type');
+    const matchType: MatchType | undefined = matchTypeParam && ['exact', 'starts_with', 'ends_with', 'contains'].includes(matchTypeParam)
+      ? (matchTypeParam as MatchType)
+      : 'exact';
+    const params: AdvanceSearchParams = {
       attribute_name: urlObj.searchParams.get('attribute_name') || '',
       attribute_value: urlObj.searchParams.get('attribute_value') || '',
-      match_type: urlObj.searchParams.get('match_type') || 'exact',
+      match_type: matchType,
       page: parseInt(urlObj.searchParams.get('page') || '1', 10),
     };
     return apiClient.advanceSearch(params);

@@ -12,9 +12,7 @@
     "dist-electron"
   ],
   "mac": {
-    "target": [
-      "dmg"
-    ],
+    "target": ["zip", "dmg"],
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
