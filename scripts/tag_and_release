@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -e
+
+# Get tag from command line argument or use default
+TAG="${1:-v1.0.0}"
+
+if [ -z "$TAG" ]; then
+  echo "Error: Tag name is required"
+  echo "Usage: $0 <tag_name>"
+  echo "Example: $0 v1.0.0"
+  exit 1
+fi
+
+echo "Creating and pushing tag: $TAG"
+
+git tag -d "$TAG" 2>/dev/null || true
+git push origin --delete "$TAG" 2>/dev/null || true
+git tag "$TAG"
+git push origin "$TAG"
+
+echo "Tag $TAG created and pushed successfully"
