@@ -306,6 +306,10 @@ export function setupPatientHandlers(
       const errors: string[] = [];
       // Map CSV patient IDs to database IDs (for consultations that reference CSV IDs)
       const csvIdToDbIdMap = new Map<number, number>();
+      // Track skipped patient IDs (missing name) - will check if consultations reference them
+      const skippedPatientIds = new Map<number, string>();
+      // Track which patient IDs consultations reference
+      const consultationPatientIds = new Set<number>();
 
       // Import patients
       if (patientsFile) {
@@ -373,7 +377,10 @@ export function setupPatientHandlers(
 
               // Only require name for NEW patients (existing patients already have name from database)
               if (!existingPatient && nameStr.length === 0) {
-                errors.push(`Skipping patient "${csvId ? `ID ${csvId}` : 'unknown'}": missing required field (name) for new patient`);
+                // Track skipped patient ID - will check if consultations reference it later
+                if (csvId && !isNaN(csvId)) {
+                  skippedPatientIds.set(csvId, `Skipping patient "ID ${csvId}": missing required field (name) for new patient`);
+                }
                 continue;
               }
 
@@ -506,6 +513,9 @@ export function setupPatientHandlers(
                 continue;
               }
 
+              // Track that this patient ID is referenced by consultations
+              consultationPatientIds.add(csvPatientId);
+
               // Check CSV ID to DB ID map first (for newly imported patients)
               let dbPatientId = csvIdToDbIdMap.get(csvPatientId);
               let patient = null;
@@ -555,6 +565,13 @@ export function setupPatientHandlers(
         } catch (error: unknown) {
           const errorObj = error as Error;
           errors.push(`Error reading consultations file: ${errorObj.message}`);
+        }
+      }
+
+      // Only add errors for skipped patients that have consultations referencing them
+      for (const [patientId, errorMsg] of skippedPatientIds.entries()) {
+        if (consultationPatientIds.has(patientId)) {
+          errors.push(errorMsg);
         }
       }
 

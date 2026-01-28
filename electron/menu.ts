@@ -161,7 +161,7 @@ async function checkForUpdates(mainWindow: BrowserWindow) {
 export function createMenu(mainWindow: BrowserWindow): void {
   const template: Electron.MenuItemConstructorOptions[] = [
     {
-      label: 'File',
+      label: 'Archivo',
       submenu: [
         {
           label: 'Importar datos',
