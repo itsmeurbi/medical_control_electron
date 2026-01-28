@@ -11,6 +11,8 @@
     "build": "tsc && vite build && electron-builder",
     "build:mac": "npm run build && electron-builder --mac --arm64 --x64",
     "lint": "eslint",
+    "type-check": "tsc --noEmit",
+    "lint:full": "yarn lint && yarn type-check",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",

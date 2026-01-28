@@ -142,12 +142,13 @@ async function checkForUpdates(mainWindow: BrowserWindow) {
         buttons: ['Entendido']
       });
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
     dialog.showMessageBox(mainWindow, {
       type: 'error',
       title: 'Error al verificar actualizaciones',
       message: 'No se pudo verificar actualizaciones',
-      detail: `Error: ${error.message}\n\nPuedes verificar manualmente en:\nhttps://github.com/itsmeurbi/medical_control_electron/releases`,
+      detail: `Error: ${errorMessage}\n\nPuedes verificar manualmente en:\nhttps://github.com/itsmeurbi/medical_control_electron/releases`,
       buttons: ['Entendido']
     });
   }
@@ -157,8 +158,8 @@ async function checkForUpdates(mainWindow: BrowserWindow) {
  * Creates and sets the application menu
  * @param mainWindow - The main browser window instance
  */
-export function createMenu(mainWindow: BrowserWindow) {
-  const template: any[] = [
+export function createMenu(mainWindow: BrowserWindow): void {
+  const template: Electron.MenuItemConstructorOptions[] = [
     {
       label: 'File',
       submenu: [

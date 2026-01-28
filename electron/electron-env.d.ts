@@ -1,5 +1,19 @@
 /// <reference types="vite-plugin-electron/electron-env" />
 
+import type {
+  PatientWithComputed,
+  PatientCreateData,
+  PatientUpdateData,
+  ConsultationListResponse,
+  ConsultationCreateData,
+  ConsultationUpdateData,
+  StatisticsResponse,
+  AdvanceSearchParams,
+  AdvanceSearchResponse,
+  ImportResponse,
+} from './lib/handlers/types';
+import type { Consultation } from '../lib/types';
+
 declare namespace NodeJS {
   interface ProcessEnv {
     /**
@@ -22,38 +36,33 @@ declare namespace NodeJS {
 }
 
 // Used in Renderer process, expose in `preload.ts`
-// Used in Renderer process, expose in `preload.ts`
 interface Window {
   electronAPI: {
-    onExportData: (callback: (event: any, ...args: any[]) => void) => void;
+    onExportData: (callback: (event: Electron.IpcRendererEvent) => void) => void;
     removeExportListener: () => void;
-    onImportData: (callback: (event: any, ...args: any[]) => void) => void;
+    onImportData: (callback: (event: Electron.IpcRendererEvent) => void) => void;
     removeImportListener: () => void;
     patients: {
-      list: () => Promise<any[]>;
-      search: (text: string) => Promise<any[]>;
-      get: (id: string | number) => Promise<any>;
-      create: (data: any) => Promise<any>;
-      update: (id: string | number, data: any) => Promise<any>;
-      delete: (id: string | number) => Promise<any>;
+      list: () => Promise<PatientWithComputed[]>;
+      search: (text: string) => Promise<PatientWithComputed[]>;
+      get: (id: string | number) => Promise<PatientWithComputed & { treatments?: Consultation[] }>;
+      create: (data: PatientCreateData) => Promise<PatientWithComputed>;
+      update: (id: string | number, data: PatientUpdateData) => Promise<PatientWithComputed>;
+      delete: (id: string | number) => Promise<{ success: boolean }>;
       export: () => Promise<Buffer>;
-      import: () => Promise<{ success: boolean; importedPatients: number; importedConsultations: number; errors?: string[]; message?: string }>;
-      recent: (limit?: number) => Promise<any[]>;
+      import: () => Promise<ImportResponse>;
+      recent: (limit?: number) => Promise<PatientWithComputed[]>;
     };
     consultations: {
-      list: (params: { patient_id: string; page?: string }) => Promise<any>;
-      get: (id: string | number) => Promise<any>;
-      create: (data: any) => Promise<any>;
-      update: (id: string | number, data: any) => Promise<any>;
-      delete: (id: string | number) => Promise<any>;
+      list: (params: { patient_id: string; page?: string }) => Promise<ConsultationListResponse>;
+      get: (id: string | number) => Promise<Consultation>;
+      create: (data: ConsultationCreateData) => Promise<Consultation>;
+      update: (id: string | number, data: ConsultationUpdateData) => Promise<Consultation>;
+      delete: (id: string | number) => Promise<{ success: boolean }>;
     };
     statistics: {
-      get: () => Promise<{
-        totalPatients: number;
-        totalConsultations: number;
-        recentRegistrations: number;
-      }>;
+      get: () => Promise<StatisticsResponse>;
     };
-    advanceSearch: (params: any) => Promise<any>;
+    advanceSearch: (params: AdvanceSearchParams) => Promise<AdvanceSearchResponse>;
   };
 }
