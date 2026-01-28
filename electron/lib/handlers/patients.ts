@@ -2,7 +2,7 @@ import { ipcMain, dialog, BrowserWindow } from 'electron';
 import { createRequire } from 'node:module';
 import fs from 'fs';
 import path from 'path';
-import type { DatabaseModule, PatientWithComputed, PatientCreateData, PatientUpdateData, ImportResponse } from './types';
+import type { DatabaseModule, PatientWithComputed, PatientCreateData, PatientUpdateData, ImportResponse, PatientCsvRow, ConsultationCsvRow } from './types';
 import type { Patient } from '../../../lib/types';
 import {
   cleanData,
@@ -25,6 +25,15 @@ function omit<T extends Record<string, unknown>, K extends string>(
     delete result[key];
   }
   return result as Omit<T, K>;
+}
+
+// Helper to titleize names (capitalize first letter of each word)
+function titleizeName(name: string): string {
+  return name
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
 
 export function setupPatientHandlers(
@@ -295,6 +304,8 @@ export function setupPatientHandlers(
       let importedPatients = 0;
       let importedConsultations = 0;
       const errors: string[] = [];
+      // Map CSV patient IDs to database IDs (for consultations that reference CSV IDs)
+      const csvIdToDbIdMap = new Map<number, number>();
 
       // Import patients
       if (patientsFile) {
@@ -308,7 +319,13 @@ export function setupPatientHandlers(
 
           for (const record of records) {
             try {
-              const patientData = transformPatientForImport(record);
+              // Convert empty strings to null in the raw record before transformation
+              const cleanedRecord: Record<string, unknown> = {};
+              for (const [key, value] of Object.entries(record)) {
+                cleanedRecord[key] = value === '' ? null : value;
+              }
+
+              const patientData = transformPatientForImport(cleanedRecord as unknown as PatientCsvRow);
 
               // Get the original ID from CSV if present
               const csvId = patientData.id ? (typeof patientData.id === 'string' ? parseInt(patientData.id, 10) : patientData.id) : null;
@@ -317,11 +334,46 @@ export function setupPatientHandlers(
               const patientDataRecord = patientData as unknown as Record<string, unknown>;
               const dataToImport = omit(patientDataRecord, ['id', 'treatments', 'age', 'medical_record']);
 
-              // Ensure required fields
+              // Check if patient exists by ID FIRST (before validating required fields)
+              let existingPatient = null;
+              if (csvId && !isNaN(csvId)) {
+                existingPatient = await patientQueries.findById(csvId);
+              }
+
+              // Get CSV values
               const dataToImportRecord = dataToImport as Record<string, unknown>;
+              let nameValue = dataToImportRecord.name;
+              const registeredAtValue = dataToImportRecord.registeredAt;
               const genderValue = dataToImportRecord.gender;
-              if (!dataToImportRecord.name || !dataToImportRecord.registeredAt || genderValue === undefined || genderValue === null || genderValue === '') {
-                errors.push(`Skipping patient "${(dataToImportRecord.name as string) || 'unknown'}": missing required fields (name, registeredAt, or gender)`);
+
+              // If patient exists and CSV name is empty, use existing patient's name
+              if (existingPatient && (!nameValue || (typeof nameValue === 'string' && nameValue.trim() === ''))) {
+                nameValue = existingPatient.name;
+                dataToImportRecord.name = existingPatient.name;
+              }
+
+              let nameStr = typeof nameValue === 'string' ? nameValue.trim() : String(nameValue || '');
+
+              // Normalize name to title case
+              if (nameStr.length > 0) {
+                nameStr = titleizeName(nameStr);
+                dataToImportRecord.name = nameStr;
+              }
+              let registeredAtStr = typeof registeredAtValue === 'string' ? registeredAtValue.trim() : String(registeredAtValue || '');
+
+              // Default missing values
+              if (registeredAtStr.length === 0) {
+                registeredAtStr = new Date().toISOString();
+                dataToImportRecord.registeredAt = registeredAtStr;
+              }
+
+              if (genderValue === undefined || genderValue === null || genderValue === '') {
+                dataToImportRecord.gender = 'masculino';
+              }
+
+              // Only require name for NEW patients (existing patients already have name from database)
+              if (!existingPatient && nameStr.length === 0) {
+                errors.push(`Skipping patient "${csvId ? `ID ${csvId}` : 'unknown'}": missing required field (name) for new patient`);
                 continue;
               }
 
@@ -329,12 +381,12 @@ export function setupPatientHandlers(
               if (dataToImportRecord.registeredAt) {
                 const normalized = normalizeDateToISO(dataToImportRecord.registeredAt);
                 if (!normalized) {
-                  errors.push(`Skipping patient "${(dataToImportRecord.name as string) || 'unknown'}": invalid registeredAt date format`);
+                  errors.push(`Skipping patient "${nameStr || 'unknown'}": invalid registeredAt date format`);
                   continue;
                 }
                 dataToImportRecord.registeredAt = normalized;
               }
-              
+
               if (dataToImportRecord.birthDate) {
                 const normalized = normalizeDateToISO(dataToImportRecord.birthDate);
                 dataToImportRecord.birthDate = normalized;
@@ -364,20 +416,10 @@ export function setupPatientHandlers(
               // Clean the data using the same function as create
               const cleaned = cleanData(dataToImportRecord as Record<string, unknown>);
 
-              // Check if patient already exists (by ID and name match)
-              let existingPatient = null;
-              if (csvId && !isNaN(csvId)) {
-                existingPatient = await patientQueries.findById(csvId);
-                // Verify name also matches
-                if (existingPatient && existingPatient.name !== dataToImport.name) {
-                  existingPatient = null; // ID matches but name doesn't, treat as new
-                }
-              }
-
               // If not found by ID, check by name
-              if (!existingPatient) {
+              if (!existingPatient && nameStr) {
                 const patientsByName = await prisma.patient.findMany({
-                  where: { name: dataToImportRecord.name as string },
+                  where: { name: nameStr },
                   take: 1,
                 });
                 if (patientsByName.length > 0) {
@@ -392,10 +434,16 @@ export function setupPatientHandlers(
               if (existingPatient && existingPatient.id) {
                 // Update existing patient
                 await patientQueries.update(existingPatient.id, cleaned);
+                if (csvId && !isNaN(csvId)) {
+                  csvIdToDbIdMap.set(csvId, existingPatient.id);
+                }
                 importedPatients++;
               } else {
                 // Create new patient
-                await patientQueries.create(cleaned);
+                const newPatient = await patientQueries.create(cleaned);
+                if (csvId && !isNaN(csvId) && newPatient.id) {
+                  csvIdToDbIdMap.set(csvId, newPatient.id);
+                }
                 importedPatients++;
               }
             } catch (error: unknown) {
@@ -427,36 +475,59 @@ export function setupPatientHandlers(
 
           for (const record of records) {
             try {
-              const consultationData = transformConsultationForImport(record);
+              // Convert empty strings to null in the raw record before transformation
+              const cleanedRecord: Record<string, unknown> = {};
+              for (const [key, value] of Object.entries(record)) {
+                cleanedRecord[key] = value === '' ? null : value;
+              }
+
+              const consultationData = transformConsultationForImport(cleanedRecord as unknown as ConsultationCsvRow);
 
               // Remove fields that shouldn't be in create
               const dataToImport = omit(consultationData, ['id', 'createdAt', 'updatedAt']);
 
-              // Ensure required fields
-              if (!dataToImport.patientId || !dataToImport.date) {
-                errors.push(`Skipping consultation: missing required fields (patient_id or date)`);
+              // Ensure required fields - check for null, undefined, or empty string
+              const patientIdValue = dataToImport.patientId;
+              const dateValue = dataToImport.date;
+
+              const patientIdStr = patientIdValue ? String(patientIdValue).trim() : '';
+              const dateStr = dateValue ? String(dateValue).trim() : '';
+
+              if (!patientIdStr || !dateStr) {
+                errors.push(`Skipping consultation: missing required fields (patient_id: "${patientIdValue}", date: "${dateValue}")`);
                 continue;
               }
 
-              // Convert patientId to number (CSV reads it as string)
-              const patientId = typeof dataToImport.patientId === 'string'
-                ? parseInt(dataToImport.patientId, 10)
-                : dataToImport.patientId;
+              // Convert patientId to number (CSV reads it as string, handle spaces/trimming)
+              const csvPatientId = parseInt(patientIdStr, 10);
 
-              if (isNaN(patientId)) {
-                errors.push(`Skipping consultation: invalid patient_id "${dataToImport.patientId}"`);
+              if (isNaN(csvPatientId) || csvPatientId <= 0) {
+                errors.push(`Skipping consultation: invalid patient_id "${patientIdValue}" (parsed as "${patientIdStr}")`);
                 continue;
               }
 
-              // Check if patient exists
-              const patient = await patientQueries.findById(patientId);
+              // Check CSV ID to DB ID map first (for newly imported patients)
+              let dbPatientId = csvIdToDbIdMap.get(csvPatientId);
+              let patient = null;
+
+              if (dbPatientId) {
+                // Use mapped database ID
+                patient = await patientQueries.findById(dbPatientId);
+              } else {
+                // Try CSV ID directly (for existing patients that weren't updated)
+                patient = await patientQueries.findById(csvPatientId);
+                if (patient) {
+                  dbPatientId = csvPatientId;
+                }
+              }
+
               if (!patient) {
-                errors.push(`Skipping consultation: patient ID ${patientId} not found`);
+                errors.push(`Skipping consultation: patient ID ${csvPatientId} not found`);
                 continue;
               }
 
-              // Update patientId to the converted number
-              dataToImport.patientId = patientId;
+              // Update patientId to the database ID
+              dataToImport.patientId = dbPatientId;
 
               // Normalize date to ISO format
               if (dataToImport.date) {
