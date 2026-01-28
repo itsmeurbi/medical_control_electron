@@ -240,7 +240,7 @@ export function setupPatientHandlers(
   ipcMain.handle('api:patients:export', async (): Promise<{ success: boolean; filePath?: string }> => {
     try {
       // Create database backup before export
-      createDatabaseBackup();
+      const backupPath = createDatabaseBackup();
 
       const { stringify } = require('csv-stringify/sync');
       const JSZip = require('jszip');
@@ -264,6 +264,14 @@ export function setupPatientHandlers(
       const today = new Date().toISOString().split('T')[0];
       zip.file(`patients_${today}.csv`, patientsCsv);
       zip.file(`consults_${today}.csv`, consultationsCsv);
+
+      // Add database backup file to ZIP if it exists
+      if (backupPath && fs.existsSync(backupPath)) {
+        const backupFileName = path.basename(backupPath);
+        const backupFileContent = fs.readFileSync(backupPath);
+        zip.file(backupFileName, backupFileContent);
+        console.log(`Added database backup to export: ${backupFileName}`);
+      }
 
       const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
 
