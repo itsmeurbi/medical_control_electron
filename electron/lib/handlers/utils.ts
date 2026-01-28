@@ -15,6 +15,19 @@ export function cleanData<T extends Record<string, unknown>>(data: T): Partial<T
   return cleaned;
 }
 
+// Normalize date to ISO format - handles all date formats consistently
+export function normalizeDateToISO(dateValue: unknown): string | null {
+  if (!dateValue || dateValue === '') return null;
+  if (typeof dateValue !== 'string') return null;
+  try {
+    const date = new Date(dateValue);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString();
+  } catch {
+    return null;
+  }
+}
+
 // Transform patient data to snake_case for backward compatibility
 export function transformPatientForExport(patient: Patient): PatientCsvRow {
   // Map camelCase to snake_case matching the reference CSV column order

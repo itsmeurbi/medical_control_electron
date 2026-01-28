@@ -10,6 +10,7 @@ import {
   transformConsultationForExport,
   transformPatientForImport,
   transformConsultationForImport,
+  normalizeDateToISO,
 } from './utils';
 
 const require = createRequire(import.meta.url);
@@ -324,21 +325,19 @@ export function setupPatientHandlers(
                 continue;
               }
 
-              // Convert date strings to ISO format if needed
-              if (dataToImport.registeredAt && typeof dataToImport.registeredAt === 'string' && !dataToImport.registeredAt.includes('T')) {
-                try {
-                  dataToImport.registeredAt = new Date(dataToImport.registeredAt).toISOString();
-                } catch (e) {
-                  errors.push(`Skipping patient "${dataToImport.name}": invalid registeredAt date format`);
+              // Normalize all date fields to ISO format
+              if (dataToImportRecord.registeredAt) {
+                const normalized = normalizeDateToISO(dataToImportRecord.registeredAt);
+                if (!normalized) {
+                  errors.push(`Skipping patient "${(dataToImportRecord.name as string) || 'unknown'}": invalid registeredAt date format`);
                   continue;
                 }
+                dataToImportRecord.registeredAt = normalized;
               }
-              if (dataToImport.birthDate && typeof dataToImport.birthDate === 'string' && dataToImport.birthDate !== '' && !dataToImport.birthDate.includes('T')) {
-                try {
-                  dataToImport.birthDate = new Date(dataToImport.birthDate).toISOString();
-                } catch (e) {
-                  dataToImport.birthDate = null;
-                }
+              
+              if (dataToImportRecord.birthDate) {
+                const normalized = normalizeDateToISO(dataToImportRecord.birthDate);
+                dataToImportRecord.birthDate = normalized;
               }
 
               // Convert boolean strings to actual booleans
@@ -459,14 +458,14 @@ export function setupPatientHandlers(
               // Update patientId to the converted number
               dataToImport.patientId = patientId;
 
-              // Convert date string to ISO format if needed
-              if (dataToImport.date && typeof dataToImport.date === 'string' && !dataToImport.date.includes('T')) {
-                try {
-                  dataToImport.date = new Date(dataToImport.date).toISOString();
-                } catch (e) {
+              // Normalize date to ISO format
+              if (dataToImport.date) {
+                const normalized = normalizeDateToISO(dataToImport.date);
+                if (!normalized) {
                   errors.push(`Skipping consultation: invalid date format for patient ID ${dataToImport.patientId}`);
                   continue;
                 }
+                dataToImport.date = normalized;
               }
 
               // Clean the data (consultationQueries.create uses cleanData internally, but let's be explicit)
