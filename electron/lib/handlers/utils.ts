@@ -116,15 +116,41 @@ export function transformPatientForExport(patient: Patient): PatientCsvRow {
     'cellphone_number_two', 'cellphone_number_three'
   ];
 
+  // Reverse enum maps for converting numbers back to strings (for backward compatibility)
+  const reverseEnumMaps: Record<string, Record<number, string>> = {
+    maritalStatus: { 0: 'casado', 1: 'divorciado', 2: 'soltero', 3: 'unionlibre', 4: 'viudo' },
+    evera: { 0: 'leve', 1: 'moderado', 2: 'fuerte', 3: 'muyfuerte', 4: 'insoportable' },
+    bloodType: { 0: 'a', 1: 'b', 2: 'ab', 3: 'o' },
+    rhFactor: { 0: 'negativo', 1: 'positivo' },
+  };
+
+  // Boolean fields that need explicit conversion to strings
+  const booleanFields = ['rx', 'cat', 'mri', 'us', 'do', 'emg'];
+
   const transformedRecord = transformed as unknown as Record<string, unknown>;
   for (const snakeKey of columnOrder) {
     const camelKey = Object.keys(mapping).find(k => mapping[k] === snakeKey);
     if (camelKey && Object.prototype.hasOwnProperty.call(patient, camelKey)) {
       const patientRecord = patient as unknown as Record<string, unknown>;
-      const value = patientRecord[camelKey];
+      let value = patientRecord[camelKey];
+
+      // Convert boolean values to strings explicitly
+      if (booleanFields.includes(snakeKey) && typeof value === 'boolean') {
+        value = String(value); // "true" or "false"
+      }
+      // Convert enum numbers back to strings if needed (for backward compatibility)
+      else if (reverseEnumMaps[camelKey] && typeof value === 'number') {
+        value = reverseEnumMaps[camelKey][value] ?? value;
+      }
+
       transformedRecord[snakeKey] = value;
     } else {
-      transformedRecord[snakeKey] = null;
+      // For boolean fields, if not present, default to "false" string
+      if (booleanFields.includes(snakeKey)) {
+        transformedRecord[snakeKey] = 'false';
+      } else {
+        transformedRecord[snakeKey] = null;
+      }
     }
   }
 
@@ -257,33 +283,39 @@ export async function advancedSearch(
   const searchValue = attributeValue.toLowerCase();
   const whereClause: Record<string, unknown> = {};
 
-  if (['gender', 'maritalStatus', 'evera', 'bloodType', 'rhFactor'].includes(attributeName)) {
-    const enumMap: Record<string, Record<string, number>> = {
-      gender: { masculino: 0, femenino: 1 },
-      maritalStatus: { casado: 0, divorciado: 1, soltero: 2, unionlibre: 3, viudo: 4 },
-      evera: { leve: 0, moderado: 1, fuerte: 2, muyfuerte: 3, insoportable: 4 },
-      bloodType: { a: 0, b: 1, ab: 2, o: 3 },
-      rhFactor: { negativo: 0, positivo: 1 },
-    };
-
-    const enumValues = enumMap[attributeName];
-    if (enumValues) {
-      const matchingValues = Object.entries(enumValues)
-        .filter(([key]) => {
-          switch (matchType) {
-            case 'starts_with': return key.startsWith(searchValue);
-            case 'ends_with': return key.endsWith(searchValue);
-            case 'contains': return key.includes(searchValue);
-            default: return key === searchValue;
-          }
-        })
-        .map(([, value]) => value);
-
-      if (matchingValues.length > 0) {
-        whereClause[attributeName] = { in: matchingValues };
-      } else {
-        return [];
-      }
+  // maritalStatus, evera, bloodType, rhFactor are now strings, not enums
+  // gender remains a string field, so handle all string fields the same way
+  if (['maritalStatus', 'evera', 'bloodType', 'rhFactor'].includes(attributeName)) {
+    // These are now string fields, search them as strings
+    const field = attributeName;
+    switch (matchType) {
+      case 'starts_with':
+        whereClause[field] = { startsWith: attributeValue };
+        break;
+      case 'ends_with':
+        whereClause[field] = { endsWith: attributeValue };
+        break;
+      case 'contains':
+        whereClause[field] = { contains: attributeValue };
+        break;
+      default:
+        whereClause[field] = attributeValue;
+    }
+  } else if (attributeName === 'gender') {
+    // Gender is still a string field
+    const field = attributeName;
+    switch (matchType) {
+      case 'starts_with':
+        whereClause[field] = { startsWith: attributeValue };
+        break;
+      case 'ends_with':
+        whereClause[field] = { endsWith: attributeValue };
+        break;
+      case 'contains':
+        whereClause[field] = { contains: attributeValue };
+        break;
+      default:
+        whereClause[field] = attributeValue;
     }
   } else {
     const field = attributeName;

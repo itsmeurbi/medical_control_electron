@@ -28,11 +28,7 @@ export type AggregatePatient = {
 
 export type PatientAvgAggregateOutputType = {
   id: number | null
-  maritalStatus: number | null
   evaluation: number | null
-  evera: number | null
-  bloodType: number | null
-  rhFactor: number | null
   weight: number | null
   height: number | null
   heartRate: number | null
@@ -41,11 +37,7 @@ export type PatientAvgAggregateOutputType = {
 
 export type PatientSumAggregateOutputType = {
   id: number | null
-  maritalStatus: number | null
   evaluation: number | null
-  evera: number | null
-  bloodType: number | null
-  rhFactor: number | null
   weight: number | null
   height: number | null
   heartRate: number | null
@@ -62,7 +54,7 @@ export type PatientMinAggregateOutputType = {
   medicalRecord: string | null
   registeredAt: string | null
   gender: string | null
-  maritalStatus: number | null
+  maritalStatus: string | null
   reference: string | null
   occupations: string | null
   primaryDx: string | null
@@ -80,10 +72,10 @@ export type PatientMinAggregateOutputType = {
   alergies: string | null
   irradiations: string | null
   evaluation: number | null
-  evera: number | null
+  evera: string | null
   previousTx: string | null
-  bloodType: number | null
-  rhFactor: number | null
+  bloodType: string | null
+  rhFactor: string | null
   weight: number | null
   height: number | null
   bloodPressure: string | null
@@ -131,7 +123,7 @@ export type PatientMaxAggregateOutputType = {
   medicalRecord: string | null
   registeredAt: string | null
   gender: string | null
-  maritalStatus: number | null
+  maritalStatus: string | null
   reference: string | null
   occupations: string | null
   primaryDx: string | null
@@ -149,10 +141,10 @@ export type PatientMaxAggregateOutputType = {
   alergies: string | null
   irradiations: string | null
   evaluation: number | null
-  evera: number | null
+  evera: string | null
   previousTx: string | null
-  bloodType: number | null
-  rhFactor: number | null
+  bloodType: string | null
+  rhFactor: string | null
   weight: number | null
   height: number | null
   bloodPressure: string | null
@@ -263,11 +255,7 @@ export type PatientCountAggregateOutputType = {
 
 export type PatientAvgAggregateInputType = {
   id?: true
-  maritalStatus?: true
   evaluation?: true
-  evera?: true
-  bloodType?: true
-  rhFactor?: true
   weight?: true
   height?: true
   heartRate?: true
@@ -276,11 +264,7 @@ export type PatientAvgAggregateInputType = {
 
 export type PatientSumAggregateInputType = {
   id?: true
-  maritalStatus?: true
   evaluation?: true
-  evera?: true
-  bloodType?: true
-  rhFactor?: true
   weight?: true
   height?: true
   heartRate?: true
@@ -591,7 +575,7 @@ export type PatientGroupByOutputType = {
   medicalRecord: string | null
   registeredAt: string
   gender: string
-  maritalStatus: number | null
+  maritalStatus: string | null
   reference: string | null
   occupations: string | null
   primaryDx: string | null
@@ -609,10 +593,10 @@ export type PatientGroupByOutputType = {
   alergies: string | null
   irradiations: string | null
   evaluation: number | null
-  evera: number | null
+  evera: string | null
   previousTx: string | null
-  bloodType: number | null
-  rhFactor: number | null
+  bloodType: string | null
+  rhFactor: string | null
   weight: number | null
   height: number | null
   bloodPressure: string | null
@@ -683,7 +667,7 @@ export type PatientWhereInput = {
   medicalRecord?: Prisma.StringNullableFilter<"Patient"> | string | null
   registeredAt?: Prisma.StringFilter<"Patient"> | string
   gender?: Prisma.StringFilter<"Patient"> | string
-  maritalStatus?: Prisma.IntNullableFilter<"Patient"> | number | null
+  maritalStatus?: Prisma.StringNullableFilter<"Patient"> | string | null
   reference?: Prisma.StringNullableFilter<"Patient"> | string | null
   occupations?: Prisma.StringNullableFilter<"Patient"> | string | null
   primaryDx?: Prisma.StringNullableFilter<"Patient"> | string | null
@@ -701,10 +685,10 @@ export type PatientWhereInput = {
   alergies?: Prisma.StringNullableFilter<"Patient"> | string | null
   irradiations?: Prisma.StringNullableFilter<"Patient"> | string | null
   evaluation?: Prisma.IntNullableFilter<"Patient"> | number | null
-  evera?: Prisma.IntNullableFilter<"Patient"> | number | null
+  evera?: Prisma.StringNullableFilter<"Patient"> | string | null
   previousTx?: Prisma.StringNullableFilter<"Patient"> | string | null
-  bloodType?: Prisma.IntNullableFilter<"Patient"> | number | null
-  rhFactor?: Prisma.IntNullableFilter<"Patient"> | number | null
+  bloodType?: Prisma.StringNullableFilter<"Patient"> | string | null
+  rhFactor?: Prisma.StringNullableFilter<"Patient"> | string | null
   weight?: Prisma.FloatNullableFilter<"Patient"> | number | null
   height?: Prisma.FloatNullableFilter<"Patient"> | number | null
   bloodPressure?: Prisma.StringNullableFilter<"Patient"> | string | null
@@ -826,7 +810,7 @@ export type PatientWhereUniqueInput = Prisma.AtLeast<{
   medicalRecord?: Prisma.StringNullableFilter<"Patient"> | string | null
   registeredAt?: Prisma.StringFilter<"Patient"> | string
   gender?: Prisma.StringFilter<"Patient"> | string
-  maritalStatus?: Prisma.IntNullableFilter<"Patient"> | number | null
+  maritalStatus?: Prisma.StringNullableFilter<"Patient"> | string | null
   reference?: Prisma.StringNullableFilter<"Patient"> | string | null
   occupations?: Prisma.StringNullableFilter<"Patient"> | string | null
   primaryDx?: Prisma.StringNullableFilter<"Patient"> | string | null
@@ -844,10 +828,10 @@ export type PatientWhereUniqueInput = Prisma.AtLeast<{
   alergies?: Prisma.StringNullableFilter<"Patient"> | string | null
   irradiations?: Prisma.StringNullableFilter<"Patient"> | string | null
   evaluation?: Prisma.IntNullableFilter<"Patient"> | number | null
-  evera?: Prisma.IntNullableFilter<"Patient"> | number | null
+  evera?: Prisma.StringNullableFilter<"Patient"> | string | null
   previousTx?: Prisma.StringNullableFilter<"Patient"> | string | null
-  bloodType?: Prisma.IntNullableFilter<"Patient"> | number | null
-  rhFactor?: Prisma.IntNullableFilter<"Patient"> | number | null
+  bloodType?: Prisma.StringNullableFilter<"Patient"> | string | null
+  rhFactor?: Prisma.StringNullableFilter<"Patient"> | string | null
   weight?: Prisma.FloatNullableFilter<"Patient"> | number | null
   height?: Prisma.FloatNullableFilter<"Patient"> | number | null
   bloodPressure?: Prisma.StringNullableFilter<"Patient"> | string | null
@@ -973,7 +957,7 @@ export type PatientScalarWhereWithAggregatesInput = {
   medicalRecord?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   registeredAt?: Prisma.StringWithAggregatesFilter<"Patient"> | string
   gender?: Prisma.StringWithAggregatesFilter<"Patient"> | string
-  maritalStatus?: Prisma.IntNullableWithAggregatesFilter<"Patient"> | number | null
+  maritalStatus?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   reference?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   occupations?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   primaryDx?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
@@ -991,10 +975,10 @@ export type PatientScalarWhereWithAggregatesInput = {
   alergies?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   irradiations?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   evaluation?: Prisma.IntNullableWithAggregatesFilter<"Patient"> | number | null
-  evera?: Prisma.IntNullableWithAggregatesFilter<"Patient"> | number | null
+  evera?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   previousTx?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
-  bloodType?: Prisma.IntNullableWithAggregatesFilter<"Patient"> | number | null
-  rhFactor?: Prisma.IntNullableWithAggregatesFilter<"Patient"> | number | null
+  bloodType?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
+  rhFactor?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
   weight?: Prisma.FloatNullableWithAggregatesFilter<"Patient"> | number | null
   height?: Prisma.FloatNullableWithAggregatesFilter<"Patient"> | number | null
   bloodPressure?: Prisma.StringNullableWithAggregatesFilter<"Patient"> | string | null
@@ -1041,7 +1025,7 @@ export type PatientCreateInput = {
   medicalRecord?: string | null
   registeredAt: string
   gender: string
-  maritalStatus?: number | null
+  maritalStatus?: string | null
   reference?: string | null
   occupations?: string | null
   primaryDx?: string | null
@@ -1059,10 +1043,10 @@ export type PatientCreateInput = {
   alergies?: string | null
   irradiations?: string | null
   evaluation?: number | null
-  evera?: number | null
+  evera?: string | null
   previousTx?: string | null
-  bloodType?: number | null
-  rhFactor?: number | null
+  bloodType?: string | null
+  rhFactor?: string | null
   weight?: number | null
   height?: number | null
   bloodPressure?: string | null
@@ -1111,7 +1095,7 @@ export type PatientUncheckedCreateInput = {
   medicalRecord?: string | null
   registeredAt: string
   gender: string
-  maritalStatus?: number | null
+  maritalStatus?: string | null
   reference?: string | null
   occupations?: string | null
   primaryDx?: string | null
@@ -1129,10 +1113,10 @@ export type PatientUncheckedCreateInput = {
   alergies?: string | null
   irradiations?: string | null
   evaluation?: number | null
-  evera?: number | null
+  evera?: string | null
   previousTx?: string | null
-  bloodType?: number | null
-  rhFactor?: number | null
+  bloodType?: string | null
+  rhFactor?: string | null
   weight?: number | null
   height?: number | null
   bloodPressure?: string | null
@@ -1180,7 +1164,7 @@ export type PatientUpdateInput = {
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.StringFieldUpdateOperationsInput | string
-  maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maritalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   primaryDx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1198,10 +1182,10 @@ export type PatientUpdateInput = {
   alergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   irradiations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   evaluation?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  evera?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  evera?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previousTx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bloodType?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rhFactor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bloodType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rhFactor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   bloodPressure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1250,7 +1234,7 @@ export type PatientUncheckedUpdateInput = {
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.StringFieldUpdateOperationsInput | string
-  maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maritalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   primaryDx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1268,10 +1252,10 @@ export type PatientUncheckedUpdateInput = {
   alergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   irradiations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   evaluation?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  evera?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  evera?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previousTx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bloodType?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rhFactor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bloodType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rhFactor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   bloodPressure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1320,7 +1304,7 @@ export type PatientCreateManyInput = {
   medicalRecord?: string | null
   registeredAt: string
   gender: string
-  maritalStatus?: number | null
+  maritalStatus?: string | null
   reference?: string | null
   occupations?: string | null
   primaryDx?: string | null
@@ -1338,10 +1322,10 @@ export type PatientCreateManyInput = {
   alergies?: string | null
   irradiations?: string | null
   evaluation?: number | null
-  evera?: number | null
+  evera?: string | null
   previousTx?: string | null
-  bloodType?: number | null
-  rhFactor?: number | null
+  bloodType?: string | null
+  rhFactor?: string | null
   weight?: number | null
   height?: number | null
   bloodPressure?: string | null
@@ -1388,7 +1372,7 @@ export type PatientUpdateManyMutationInput = {
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.StringFieldUpdateOperationsInput | string
-  maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maritalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   primaryDx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1406,10 +1390,10 @@ export type PatientUpdateManyMutationInput = {
   alergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   irradiations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   evaluation?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  evera?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  evera?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previousTx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bloodType?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rhFactor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bloodType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rhFactor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   bloodPressure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1457,7 +1441,7 @@ export type PatientUncheckedUpdateManyInput = {
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.StringFieldUpdateOperationsInput | string
-  maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maritalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   primaryDx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1475,10 +1459,10 @@ export type PatientUncheckedUpdateManyInput = {
   alergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   irradiations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   evaluation?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  evera?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  evera?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previousTx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bloodType?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rhFactor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bloodType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rhFactor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   bloodPressure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1587,11 +1571,7 @@ export type PatientCountOrderByAggregateInput = {
 
 export type PatientAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  maritalStatus?: Prisma.SortOrder
   evaluation?: Prisma.SortOrder
-  evera?: Prisma.SortOrder
-  bloodType?: Prisma.SortOrder
-  rhFactor?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   height?: Prisma.SortOrder
   heartRate?: Prisma.SortOrder
@@ -1738,11 +1718,7 @@ export type PatientMinOrderByAggregateInput = {
 
 export type PatientSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  maritalStatus?: Prisma.SortOrder
   evaluation?: Prisma.SortOrder
-  evera?: Prisma.SortOrder
-  bloodType?: Prisma.SortOrder
-  rhFactor?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   height?: Prisma.SortOrder
   heartRate?: Prisma.SortOrder
@@ -1813,7 +1789,7 @@ export type PatientCreateWithoutTreatmentsInput = {
   medicalRecord?: string | null
   registeredAt: string
   gender: string
-  maritalStatus?: number | null
+  maritalStatus?: string | null
   reference?: string | null
   occupations?: string | null
   primaryDx?: string | null
@@ -1831,10 +1807,10 @@ export type PatientCreateWithoutTreatmentsInput = {
   alergies?: string | null
   irradiations?: string | null
   evaluation?: number | null
-  evera?: number | null
+  evera?: string | null
   previousTx?: string | null
-  bloodType?: number | null
-  rhFactor?: number | null
+  bloodType?: string | null
+  rhFactor?: string | null
   weight?: number | null
   height?: number | null
   bloodPressure?: string | null
@@ -1882,7 +1858,7 @@ export type PatientUncheckedCreateWithoutTreatmentsInput = {
   medicalRecord?: string | null
   registeredAt: string
   gender: string
-  maritalStatus?: number | null
+  maritalStatus?: string | null
   reference?: string | null
   occupations?: string | null
   primaryDx?: string | null
@@ -1900,10 +1876,10 @@ export type PatientUncheckedCreateWithoutTreatmentsInput = {
   alergies?: string | null
   irradiations?: string | null
   evaluation?: number | null
-  evera?: number | null
+  evera?: string | null
   previousTx?: string | null
-  bloodType?: number | null
-  rhFactor?: number | null
+  bloodType?: string | null
+  rhFactor?: string | null
   weight?: number | null
   height?: number | null
   bloodPressure?: string | null
@@ -1966,7 +1942,7 @@ export type PatientUpdateWithoutTreatmentsInput = {
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.StringFieldUpdateOperationsInput | string
-  maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maritalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   primaryDx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1984,10 +1960,10 @@ export type PatientUpdateWithoutTreatmentsInput = {
   alergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   irradiations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   evaluation?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  evera?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  evera?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previousTx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bloodType?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rhFactor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bloodType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rhFactor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   bloodPressure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2035,7 +2011,7 @@ export type PatientUncheckedUpdateWithoutTreatmentsInput = {
   medicalRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   registeredAt?: Prisma.StringFieldUpdateOperationsInput | string
   gender?: Prisma.StringFieldUpdateOperationsInput | string
-  maritalStatus?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  maritalStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reference?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occupations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   primaryDx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2053,10 +2029,10 @@ export type PatientUncheckedUpdateWithoutTreatmentsInput = {
   alergies?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   irradiations?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   evaluation?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  evera?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  evera?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   previousTx?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  bloodType?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
-  rhFactor?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  bloodType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rhFactor?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   bloodPressure?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2426,7 +2402,7 @@ export type $PatientPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     medicalRecord: string | null
     registeredAt: string
     gender: string
-    maritalStatus: number | null
+    maritalStatus: string | null
     reference: string | null
     occupations: string | null
     primaryDx: string | null
@@ -2444,10 +2420,10 @@ export type $PatientPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     alergies: string | null
     irradiations: string | null
     evaluation: number | null
-    evera: number | null
+    evera: string | null
     previousTx: string | null
-    bloodType: number | null
-    rhFactor: number | null
+    bloodType: string | null
+    rhFactor: string | null
     weight: number | null
     height: number | null
     bloodPressure: string | null
@@ -2916,7 +2892,7 @@ export interface PatientFieldRefs {
   readonly medicalRecord: Prisma.FieldRef<"Patient", 'String'>
   readonly registeredAt: Prisma.FieldRef<"Patient", 'String'>
   readonly gender: Prisma.FieldRef<"Patient", 'String'>
-  readonly maritalStatus: Prisma.FieldRef<"Patient", 'Int'>
+  readonly maritalStatus: Prisma.FieldRef<"Patient", 'String'>
   readonly reference: Prisma.FieldRef<"Patient", 'String'>
   readonly occupations: Prisma.FieldRef<"Patient", 'String'>
   readonly primaryDx: Prisma.FieldRef<"Patient", 'String'>
@@ -2934,10 +2910,10 @@ export interface PatientFieldRefs {
   readonly alergies: Prisma.FieldRef<"Patient", 'String'>
   readonly irradiations: Prisma.FieldRef<"Patient", 'String'>
   readonly evaluation: Prisma.FieldRef<"Patient", 'Int'>
-  readonly evera: Prisma.FieldRef<"Patient", 'Int'>
+  readonly evera: Prisma.FieldRef<"Patient", 'String'>
   readonly previousTx: Prisma.FieldRef<"Patient", 'String'>
-  readonly bloodType: Prisma.FieldRef<"Patient", 'Int'>
-  readonly rhFactor: Prisma.FieldRef<"Patient", 'Int'>
+  readonly bloodType: Prisma.FieldRef<"Patient", 'String'>
+  readonly rhFactor: Prisma.FieldRef<"Patient", 'String'>
   readonly weight: Prisma.FieldRef<"Patient", 'Float'>
   readonly height: Prisma.FieldRef<"Patient", 'Float'>
   readonly bloodPressure: Prisma.FieldRef<"Patient", 'String'>

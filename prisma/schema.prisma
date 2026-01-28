@@ -17,7 +17,7 @@ model Patient {
   medicalRecord        String?        @map("medical_record")
   registeredAt         String         @map("registered_at")
   gender               String
-  maritalStatus        Int?           @map("marital_status")
+  maritalStatus        String?        @map("marital_status")
   reference            String?
   occupations          String?
   primaryDx            String?        @map("primary_dx")
@@ -35,10 +35,10 @@ model Patient {
   alergies             String?
   irradiations         String?
   evaluation           Int?
-  evera                Int?
+  evera                String?
   previousTx           String?        @map("previous_tx")
-  bloodType            Int?           @map("blood_type")
-  rhFactor             Int?           @map("rh_factor")
+  bloodType            String?        @map("blood_type")
+  rhFactor             String?        @map("rh_factor")
   weight               Float?
   height               Float?
   bloodPressure        String?        @map("blood_pressure")

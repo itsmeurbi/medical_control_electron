@@ -38,12 +38,12 @@ async function ipcFetch(method: string, path: string, body?: PatientCreateData |
       const text = url.searchParams.get('text') || '';
       result = await window.electronAPI.patients.search(text);
     } else if (path.startsWith('/api/patients/export')) {
-      const buffer = await window.electronAPI.patients.export();
-      // Convert buffer to blob for download
-      const blob = new Blob([new Uint8Array(buffer)], { type: 'application/zip' });
-      const url = URL.createObjectURL(blob);
-      window.location.href = url;
-      return new Response(null, { status: 200 });
+      // Handler now shows save dialog and saves the file directly
+      const result = await window.electronAPI.patients.export();
+      return new Response(JSON.stringify(result), {
+        status: result.success ? 200 : 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
     } else if (path.startsWith('/api/patients/import')) {
       if (method === 'POST') {
         result = await window.electronAPI.patients.import();

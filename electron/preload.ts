@@ -38,7 +38,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     create: (data: PatientCreateData) => ipcRenderer.invoke('api:patients:create', data) as Promise<PatientWithComputed>,
     update: (id: string | number, data: PatientUpdateData) => ipcRenderer.invoke('api:patients:update', id, data) as Promise<PatientWithComputed>,
     delete: (id: string | number) => ipcRenderer.invoke('api:patients:delete', id) as Promise<{ success: boolean }>,
-    export: () => ipcRenderer.invoke('api:patients:export') as Promise<Buffer>,
+    export: () => ipcRenderer.invoke('api:patients:export') as Promise<{ success: boolean; filePath?: string }>,
     import: () => ipcRenderer.invoke('api:patients:import') as Promise<ImportResponse>,
     recent: (limit?: number) => ipcRenderer.invoke('api:patients:recent', limit) as Promise<PatientWithComputed[]>,
   },

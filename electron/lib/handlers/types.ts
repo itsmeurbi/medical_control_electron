@@ -39,7 +39,7 @@ export interface PatientCsvRow {
   medical_record: string | null;
   registered_at: string | null;
   gender: string | null;
-  marital_status: number | null;
+  marital_status: string | null;
   reference: string | null;
   occupations: string | null;
   primary_dx: string | null;
@@ -57,10 +57,10 @@ export interface PatientCsvRow {
   alergies: string | null;
   irradiations: string | null;
   evaluation: number | null;
-  evera: number | null;
+  evera: string | null;
   previous_tx: string | null;
-  blood_type: number | null;
-  rh_factor: number | null;
+  blood_type: string | null;
+  rh_factor: string | null;
   weight: number | null;
   height: number | null;
   blood_pressure: string | null;

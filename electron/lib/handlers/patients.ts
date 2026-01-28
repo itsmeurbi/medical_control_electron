@@ -236,10 +236,15 @@ export function setupPatientHandlers(
   });
 
   // GET /api/patients/export
-  ipcMain.handle('api:patients:export', async (): Promise<Buffer> => {
+  ipcMain.handle('api:patients:export', async (): Promise<{ success: boolean; filePath?: string }> => {
     try {
       const { stringify } = require('csv-stringify/sync');
       const JSZip = require('jszip');
+      const mainWindow = BrowserWindow.getAllWindows()[0];
+
+      if (!mainWindow) {
+        throw new Error('No main window available');
+      }
 
       const patients = await patientQueries.all();
       const allConsultations = await consultationQueries.all();
@@ -257,7 +262,31 @@ export function setupPatientHandlers(
       zip.file(`consults_${today}.csv`, consultationsCsv);
 
       const zipBuffer = await zip.generateAsync({ type: 'nodebuffer' });
-      return zipBuffer;
+
+      // Generate meaningful filename with date and time
+      const now = new Date();
+      const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+      const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
+      const suggestedFilename = `medical_control_export_${dateStr}_${timeStr}.zip`;
+
+      // Show save dialog with suggested filename
+      const result = await dialog.showSaveDialog(mainWindow, {
+        title: 'Exportar datos',
+        defaultPath: suggestedFilename,
+        filters: [
+          { name: 'Archivos ZIP', extensions: ['zip'] },
+          { name: 'Todos los archivos', extensions: ['*'] }
+        ]
+      });
+
+      if (result.canceled || !result.filePath) {
+        return { success: false };
+      }
+
+      // Write the zip file
+      fs.writeFileSync(result.filePath, zipBuffer);
+
+      return { success: true, filePath: result.filePath };
     } catch (error) {
       console.error('Error exporting data:', error);
       throw error;
@@ -400,17 +429,45 @@ export function setupPatientHandlers(
               }
 
               // Convert boolean strings to actual booleans
+              // Always initialize boolean fields to ensure they're saved even when false
               const booleanFields = ['rx', 'cat', 'mri', 'us', 'do', 'emg'];
               for (const field of booleanFields) {
+                // Initialize field if it doesn't exist
+                if (!(field in dataToImportRecord)) {
+                  dataToImportRecord[field] = false;
+                }
+
                 if (dataToImportRecord[field] !== undefined && dataToImportRecord[field] !== null) {
                   if (typeof dataToImportRecord[field] === 'string') {
-                    dataToImportRecord[field] = dataToImportRecord[field].toString().toLowerCase() === 'true' || dataToImportRecord[field] === '1';
+                    const strValue = dataToImportRecord[field].toString().toLowerCase().trim();
+                    dataToImportRecord[field] = strValue === 'true' || strValue === '1';
+                  } else if (typeof dataToImportRecord[field] === 'number') {
+                    // Convert number to boolean (0 = false, non-zero = true)
+                    dataToImportRecord[field] = dataToImportRecord[field] !== 0;
+                  } else if (typeof dataToImportRecord[field] === 'boolean') {
+                    // Already a boolean, keep it as-is (including false)
+                    // No conversion needed - the value is already correct
                   }
+                } else {
+                  // Convert null/undefined to false for boolean fields
+                  dataToImportRecord[field] = false;
                 }
               }
 
-              // Convert numeric fields
-              const numericFields = ['maritalStatus', 'evaluation', 'evera', 'bloodType', 'rhFactor', 'weight', 'height', 'heartRate', 'breathRate'];
+              // Keep enum fields as strings (maritalStatus, evera, bloodType, rhFactor)
+              // These are stored as strings in the database, so no conversion needed
+              const stringEnumFields = ['maritalStatus', 'evera', 'bloodType', 'rhFactor'];
+              for (const field of stringEnumFields) {
+                if (dataToImportRecord[field] !== undefined && dataToImportRecord[field] !== null && dataToImportRecord[field] !== '') {
+                  // Keep as string, just trim whitespace
+                  dataToImportRecord[field] = String(dataToImportRecord[field]).trim();
+                } else {
+                  dataToImportRecord[field] = null;
+                }
+              }
+
+              // Convert numeric fields (actual numbers, not enums)
+              const numericFields = ['evaluation', 'weight', 'height', 'heartRate', 'breathRate'];
               for (const field of numericFields) {
                 if (dataToImportRecord[field] !== undefined && dataToImportRecord[field] !== null && dataToImportRecord[field] !== '') {
                   const num = typeof dataToImportRecord[field] === 'string' ? parseFloat(dataToImportRecord[field] as string) : dataToImportRecord[field];

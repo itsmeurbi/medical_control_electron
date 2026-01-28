@@ -42,7 +42,7 @@ export interface Patient {
   medicalRecord?: string | null;
   registeredAt: string;
   gender: Gender;
-  maritalStatus?: MaritalStatus | null;
+  maritalStatus?: string | null;
   reference?: string | null;
   occupations?: string | null;
   primaryDx?: string | null;
@@ -60,10 +60,10 @@ export interface Patient {
   alergies?: string | null;
   irradiations?: string | null;
   evaluation?: number | null;
-  evera?: Evera | null;
+  evera?: string | null;
   previousTx?: string | null;
-  bloodType?: BloodType | null;
-  rhFactor?: RhFactor | null;
+  bloodType?: string | null;
+  rhFactor?: string | null;
   weight?: number | null;
   height?: number | null;
   bloodPressure?: string | null;
