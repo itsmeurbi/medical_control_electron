@@ -25,6 +25,9 @@ async function initDatabase() {
   try {
     process.env.USER_DATA_PATH = app.getPath('userData');
     dbModule = await import('./lib/database');
+    // Reinitialize database with correct path after USER_DATA_PATH is set
+    const { ensureDatabaseInitialized } = dbModule;
+    ensureDatabaseInitialized();
     console.log('Database initialized');
   } catch (error) {
     console.error('Failed to initialize database:', error);

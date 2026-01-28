@@ -280,7 +280,6 @@ export async function advancedSearch(
     return [];
   }
 
-  const searchValue = attributeValue.toLowerCase();
   const whereClause: Record<string, unknown> = {};
 
   // maritalStatus, evera, bloodType, rhFactor are now strings, not enums

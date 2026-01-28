@@ -31,7 +31,7 @@ declare global {
         create: (data: PatientCreateData) => Promise<PatientWithComputed>;
         update: (id: string | number, data: PatientUpdateData) => Promise<PatientWithComputed>;
         delete: (id: string | number) => Promise<{ success: boolean }>;
-        export: () => Promise<Buffer>;
+        export: () => Promise<{ success: boolean; filePath?: string }>;
         import: () => Promise<ImportResponse>;
         recent: (limit?: number) => Promise<PatientWithComputed[]>;
       };

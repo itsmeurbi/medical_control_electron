@@ -73,18 +73,12 @@ export const apiClient = {
     return wrapInResponse(data);
   },
 
-  async exportPatients(): Promise<{ buffer: Buffer; filename: string; mimeType: string }> {
+  async exportPatients(): Promise<{ success: boolean; filePath?: string }> {
     if (!window.electronAPI) {
       throw new Error('Electron API not available');
     }
-    const buffer = await window.electronAPI.patients.export();
-    // Generate filename
-    const today = new Date().toISOString().split('T')[0];
-    return {
-      buffer,
-      filename: `medical-control-export-${today}.zip`,
-      mimeType: 'application/zip',
-    };
+    // Export handler now shows save dialog and saves file directly
+    return await window.electronAPI.patients.export();
   },
 
   // Consultations API
@@ -193,23 +187,13 @@ async function handleElectronFetch(url: string, options?: RequestInit): Promise<
   if (pathname === '/api/patients/export') {
     try {
       const result = await apiClient.exportPatients();
-      // Convert Buffer to Uint8Array for Blob
-      const uint8Array = new Uint8Array(result.buffer);
-      const blob = new Blob([uint8Array], { type: result.mimeType });
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = result.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(blobUrl);
-
+      // Export handler shows save dialog and saves file directly
+      // Just return the result
       return {
-        ok: true,
-        status: 200,
-        statusText: 'OK',
-        json: async () => ({ success: true }),
+        ok: result.success,
+        status: result.success ? 200 : 400,
+        statusText: result.success ? 'OK' : 'Export canceled',
+        json: async () => result,
       } as Response;
     } catch (error) {
       return {

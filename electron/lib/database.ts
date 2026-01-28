@@ -4,40 +4,140 @@ import path from 'path';
 import fs from 'fs';
 import { generateMedicalRecord } from './utils';
 
-function getDatabasePath(): string {
+export function getDatabasePath(): string {
   const userDataPath = process.env.USER_DATA_PATH || path.join(process.cwd(), 'dev-data');
   return path.join(userDataPath, 'database', 'medical_control.db');
 }
 
-const dbPath = getDatabasePath();
-const dbDir = path.dirname(dbPath);
+// Lazy initialization - will be set when initializeDatabase is called
+let dbPath: string | null = null;
+let dbDir: string | null = null;
+let adapter: PrismaBetterSqlite3 | null = null;
+let prisma: PrismaClient | null = null;
 
-console.log('Database path:', dbPath);
+function initializeDatabase(force: boolean = false): void {
+  const newPath = getDatabasePath();
 
-// Ensure database directory exists
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+  // If already initialized with the same path, skip (unless forced)
+  if (!force && dbPath === newPath && adapter && prisma) {
+    return; // Already initialized with correct path
+  }
+
+  // If path changed, disconnect old prisma instance
+  if (prisma && dbPath !== newPath) {
+    prisma.$disconnect().catch(console.error);
+    prisma = null;
+    adapter = null;
+  }
+
+  dbPath = newPath;
+  dbDir = path.dirname(dbPath);
+
+  // Only log if USER_DATA_PATH is set (not during build/dev server startup)
+  if (process.env.USER_DATA_PATH) {
+    console.log('Database path:', dbPath);
+  }
+
+  // Ensure database directory exists
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
+  // Copy template database if it doesn't exist
+  if (!fs.existsSync(dbPath)) {
+    const templateDb = path.join(process.cwd(), 'prisma', 'template.db');
+    if (fs.existsSync(templateDb)) {
+      console.log('Copying template database...');
+      fs.copyFileSync(templateDb, dbPath);
+      console.log('Database initialized from template');
+    } else {
+      console.warn('Template database not found, creating empty database');
+    }
+  }
+
+  adapter = new PrismaBetterSqlite3({
+    url: `file:${dbPath}`
+  });
+
+  prisma = new PrismaClient({
+    adapter,
+  });
 }
 
-// Copy template database if it doesn't exist
-if (!fs.existsSync(dbPath)) {
-  const templateDb = path.join(process.cwd(), 'prisma', 'template.db');
-  if (fs.existsSync(templateDb)) {
-    console.log('Copying template database...');
-    fs.copyFileSync(templateDb, dbPath);
-    console.log('Database initialized from template');
-  } else {
-    console.warn('Template database not found, creating empty database');
+// Export function to ensure database is initialized with correct path
+export function ensureDatabaseInitialized(): void {
+  initializeDatabase(true); // Force reinitialization to use updated USER_DATA_PATH
+}
+
+// Don't initialize at module load - wait for ensureDatabaseInitialized() to be called
+// This ensures USER_DATA_PATH is set before initialization
+
+/**
+ * Creates a backup copy of the database file with date format DD_MM_YYYY
+ * @returns The path to the backup file, or null if backup failed
+ */
+export function createDatabaseBackup(): string | null {
+  try {
+    // Ensure database is initialized and get the actual path
+    ensureDatabaseInitialized();
+    const currentDbPath = dbPath!;
+
+    console.log('[Backup] Attempting to create backup...');
+    console.log('[Backup] Database path:', currentDbPath);
+
+    // Check if database file exists
+    if (!fs.existsSync(currentDbPath)) {
+      console.warn(`[Backup] Database file does not exist at ${currentDbPath}, skipping backup`);
+      return null;
+    }
+
+    // Format date as DD_MM_YYYY
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const dateStr = `${day}_${month}_${year}`;
+
+    // Create backup filename in the same directory as the database
+    const backupDir = path.dirname(currentDbPath);
+    const backupFileName = `medical_control_backup_${dateStr}.db`;
+    const backupPath = path.join(backupDir, backupFileName);
+
+    console.log('[Backup] Backup will be saved to:', backupPath);
+
+    // Ensure backup directory exists
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+    }
+
+    // Copy the database file
+    fs.copyFileSync(currentDbPath, backupPath);
+
+    // Verify backup was created
+    if (fs.existsSync(backupPath)) {
+      const stats = fs.statSync(backupPath);
+      console.log(`✓ Database backup created successfully: ${backupPath} (${stats.size} bytes)`);
+      return backupPath;
+    } else {
+      console.error('[Backup] Backup file was not created after copy operation');
+      return null;
+    }
+  } catch (error) {
+    console.error('[Backup] Error creating database backup:', error);
+    if (error instanceof Error) {
+      console.error('[Backup] Error details:', error.message, error.stack);
+    }
+    return null;
   }
 }
 
-const adapter = new PrismaBetterSqlite3({
-  url: `file:${dbPath}`
-});
-
-const prisma = new PrismaClient({
-  adapter,
-});
+// Get Prisma instance (lazy initialization)
+function getPrisma(): PrismaClient {
+  if (!prisma) {
+    initializeDatabase();
+  }
+  return prisma!;
+}
 
 // Clean data for Prisma - remove undefined and ensure proper types
 function cleanData(data: Record<string, unknown>): Record<string, unknown> {
@@ -57,13 +157,13 @@ function cleanData(data: Record<string, unknown>): Record<string, unknown> {
 // Patient queries
 export const patientQueries = {
   all: async () => {
-    return prisma.patient.findMany({
+    return getPrisma().patient.findMany({
       orderBy: { name: 'asc' },
     });
   },
 
   findById: async (id: number) => {
-    return prisma.patient.findUnique({
+    return getPrisma().patient.findUnique({
       where: { id },
       include: { treatments: true },
     });
@@ -87,18 +187,18 @@ export const patientQueries = {
       data.birthDate = null;
     }
 
-    const result = await prisma.patient.create({
+    const result = await getPrisma().patient.create({
       data: data as never,
     });
 
     // Update medical_record
     const medicalRecord = generateMedicalRecord(result.id);
-    await prisma.patient.update({
+    await getPrisma().patient.update({
       where: { id: result.id },
       data: { medicalRecord },
     });
 
-    return prisma.patient.findUnique({
+    return getPrisma().patient.findUnique({
       where: { id: result.id },
       include: { treatments: true },
     });
@@ -128,7 +228,7 @@ export const patientQueries = {
       }
     }
 
-    return prisma.patient.update({
+    return getPrisma().patient.update({
       where: { id },
       data: data as never,
       include: { treatments: true },
@@ -136,14 +236,14 @@ export const patientQueries = {
   },
 
   delete: async (id: number) => {
-    return prisma.patient.delete({
+    return getPrisma().patient.delete({
       where: { id },
     });
   },
 
   search: async (query: string) => {
     // SQLite doesn't support case-insensitive mode, so we use contains without mode
-    return prisma.patient.findMany({
+    return getPrisma().patient.findMany({
       where: {
         name: { contains: query },
       },
@@ -153,11 +253,11 @@ export const patientQueries = {
   },
 
   count: async () => {
-    return prisma.patient.count();
+    return getPrisma().patient.count();
   },
 
   recent: async (limit: number = 10) => {
-    return prisma.patient.findMany({
+    return getPrisma().patient.findMany({
       orderBy: { registeredAt: 'desc' },
       take: limit,
     });
@@ -167,8 +267,8 @@ export const patientQueries = {
     const date = new Date();
     date.setDate(date.getDate() - days);
     const startDate = date.toISOString();
-    
-    return prisma.patient.count({
+
+    return getPrisma().patient.count({
       where: {
         registeredAt: {
           gte: startDate,
@@ -181,20 +281,20 @@ export const patientQueries = {
 // Consultation queries
 export const consultationQueries = {
   all: async () => {
-    return prisma.consultation.findMany({
+    return getPrisma().consultation.findMany({
       orderBy: { date: 'desc' },
     });
   },
 
   findByPatientId: async (patientId: number) => {
-    return prisma.consultation.findMany({
+    return getPrisma().consultation.findMany({
       where: { patientId },
       orderBy: { createdAt: 'desc' },
     });
   },
 
   findByPatientIdPaginated: async (patientId: number, skip: number, take: number) => {
-    return prisma.consultation.findMany({
+    return getPrisma().consultation.findMany({
       where: { patientId },
       orderBy: { createdAt: 'desc' },
       skip,
@@ -203,13 +303,13 @@ export const consultationQueries = {
   },
 
   countByPatientId: async (patientId: number) => {
-    return prisma.consultation.count({
+    return getPrisma().consultation.count({
       where: { patientId },
     });
   },
 
   findById: async (id: number) => {
-    return prisma.consultation.findUnique({
+    return getPrisma().consultation.findUnique({
       where: { id },
       include: { patient: true },
     });
@@ -228,7 +328,7 @@ export const consultationQueries = {
       data.date = new Date(data.date).toISOString();
     }
 
-    return prisma.consultation.create({
+    return getPrisma().consultation.create({
       data: data as never,
       include: { patient: true },
     });
@@ -245,7 +345,7 @@ export const consultationQueries = {
       data.date = new Date(data.date).toISOString();
     }
 
-    return prisma.consultation.update({
+    return getPrisma().consultation.update({
       where: { id },
       data: data as never,
       include: { patient: true },
@@ -253,14 +353,27 @@ export const consultationQueries = {
   },
 
   delete: async (id: number) => {
-    return prisma.consultation.delete({
+    return getPrisma().consultation.delete({
       where: { id },
     });
   },
 
   count: async () => {
-    return prisma.consultation.count();
+    return getPrisma().consultation.count();
   },
 };
 
-export default prisma;
+// Lazy default export - use Proxy to defer initialization until actually accessed
+const lazyPrisma = new Proxy({} as PrismaClient, {
+  get(_target, prop) {
+    const prismaInstance = getPrisma();
+    const value = prismaInstance[prop as keyof PrismaClient];
+    // If it's a function, bind it to the instance
+    if (typeof value === 'function') {
+      return value.bind(prismaInstance);
+    }
+    return value;
+  }
+});
+
+export default lazyPrisma;

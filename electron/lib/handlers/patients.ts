@@ -12,6 +12,7 @@ import {
   transformConsultationForImport,
   normalizeDateToISO,
 } from './utils';
+import { createDatabaseBackup } from '../database';
 
 const require = createRequire(import.meta.url);
 
@@ -238,6 +239,9 @@ export function setupPatientHandlers(
   // GET /api/patients/export
   ipcMain.handle('api:patients:export', async (): Promise<{ success: boolean; filePath?: string }> => {
     try {
+      // Create database backup before export
+      createDatabaseBackup();
+
       const { stringify } = require('csv-stringify/sync');
       const JSZip = require('jszip');
       const mainWindow = BrowserWindow.getAllWindows()[0];
@@ -296,6 +300,9 @@ export function setupPatientHandlers(
   // POST /api/patients/import
   ipcMain.handle('api:patients:import', async (): Promise<ImportResponse> => {
     try {
+      // Create database backup before import
+      createDatabaseBackup();
+
       const { parse } = require('csv-parse/sync');
       const mainWindow = BrowserWindow.getAllWindows()[0];
 

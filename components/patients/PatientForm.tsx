@@ -157,7 +157,7 @@ export default function PatientForm({
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    maritalStatus: e.target.value ? (parseInt(e.target.value) as MaritalStatus) : undefined,
+                    maritalStatus: e.target.value ? String(parseInt(e.target.value)) : undefined,
                   })
                 }
                 className={selectBase}
@@ -501,7 +501,7 @@ export default function PatientForm({
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        evera: e.target.value ? (parseInt(e.target.value) as Evera) : undefined,
+                        evera: e.target.value ? String(parseInt(e.target.value)) : undefined,
                       })
                     }
                     className={selectBase}
@@ -607,7 +607,7 @@ export default function PatientForm({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      bloodType: e.target.value ? (parseInt(e.target.value) as BloodType) : undefined,
+                      bloodType: e.target.value ? String(parseInt(e.target.value)) : undefined,
                     })
                   }
                   className={selectBase}
@@ -626,7 +626,7 @@ export default function PatientForm({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      rhFactor: e.target.value ? (parseInt(e.target.value) as RhFactor) : undefined,
+                      rhFactor: e.target.value ? String(parseInt(e.target.value)) : undefined,
                     })
                   }
                   className={selectBase}
