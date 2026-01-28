@@ -159,7 +159,7 @@ async function checkForUpdates(mainWindow: BrowserWindow) {
  * @param mainWindow - The main browser window instance
  */
 export function createMenu(mainWindow: BrowserWindow): void {
-  const template: Electron.MenuItemConstructorOptions[] = [
+  const buildMenuTemplate = (): Electron.MenuItemConstructorOptions[] => [
     {
       label: 'Archivo',
       submenu: [
@@ -187,6 +187,26 @@ export function createMenu(mainWindow: BrowserWindow): void {
           accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
           click: () => {
             app.quit();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Preferencias',
+      submenu: [
+        {
+          label: 'Abrir al iniciar sesión',
+          type: 'checkbox',
+          checked: app.getLoginItemSettings().openAtLogin,
+          click: () => {
+            const currentSettings = app.getLoginItemSettings();
+            const newValue = !currentSettings.openAtLogin;
+            app.setLoginItemSettings({
+              openAtLogin: newValue,
+              openAsHidden: false,
+            });
+            // Rebuild menu to reflect the change
+            createMenu(mainWindow);
           }
         }
       ]
@@ -251,6 +271,8 @@ export function createMenu(mainWindow: BrowserWindow): void {
       ]
     }
   ];
+
+  let template = buildMenuTemplate();
 
   // macOS specific menu adjustments
   if (process.platform === 'darwin') {

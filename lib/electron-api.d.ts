@@ -46,6 +46,10 @@ declare global {
         get: () => Promise<StatisticsResponse>;
       };
       advanceSearch: (params: AdvanceSearchParams) => Promise<AdvanceSearchResponse>;
+      appSettings: {
+        getLoginItem: () => Promise<{ openAtLogin: boolean }>;
+        setLoginItem: (settings: { openAtLogin: boolean }) => Promise<{ success: boolean }>;
+      };
     };
   }
 }

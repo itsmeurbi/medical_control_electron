@@ -5,6 +5,7 @@ import { setupPatientHandlers } from './handlers/patients';
 import { setupConsultationHandlers } from './handlers/consultations';
 import { setupAdvanceSearchHandlers } from './handlers/advance-searches';
 import { setupStatisticsHandlers } from './handlers/statistics';
+import { setupAppSettingsHandlers } from './handlers/app-settings';
 import type { DatabaseModule } from './handlers/types';
 
 export async function setupIpcHandlers(dbModule: DatabaseModule): Promise<void> {
@@ -17,4 +18,5 @@ export async function setupIpcHandlers(dbModule: DatabaseModule): Promise<void> 
   setupConsultationHandlers(dbModule);
   setupAdvanceSearchHandlers(dbModule, calculateAge, generateMedicalRecord);
   setupStatisticsHandlers(dbModule);
+  setupAppSettingsHandlers();
 }

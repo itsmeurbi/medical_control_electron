@@ -72,6 +72,17 @@ app.whenReady().then(async () => {
   try {
     await initDatabase();
     await setupIpcHandlers(dbModule);
+
+    // Enable auto-launch on login by default (only if not already set)
+    const loginItemSettings = app.getLoginItemSettings();
+    if (!loginItemSettings.openAtLogin) {
+      app.setLoginItemSettings({
+        openAtLogin: true,
+        openAsHidden: false,
+      });
+      console.log('✓ Auto-launch on login enabled');
+    }
+
     createWindow();
 
     if (win) {

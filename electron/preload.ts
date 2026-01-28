@@ -59,4 +59,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Advance search API
   advanceSearch: (params: AdvanceSearchParams) => ipcRenderer.invoke('api:advance-searches', params) as Promise<AdvanceSearchResponse>,
+
+  // App settings API
+  appSettings: {
+    getLoginItem: () => ipcRenderer.invoke('api:app-settings:get-login-item') as Promise<{ openAtLogin: boolean }>,
+    setLoginItem: (settings: { openAtLogin: boolean }) => ipcRenderer.invoke('api:app-settings:set-login-item', settings) as Promise<{ success: boolean }>,
+  },
 });
