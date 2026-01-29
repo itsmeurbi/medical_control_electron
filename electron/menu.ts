@@ -1,8 +1,8 @@
-import { app, Menu, BrowserWindow, dialog, shell } from 'electron';
+import { app, Menu, BrowserWindow, dialog, shell, clipboard } from 'electron';
 import path from 'path';
 import https from 'https';
-import { readFileSync } from 'fs';
-import { logError, logInfo } from './lib/logger';
+import { readFileSync, existsSync, copyFileSync } from 'fs';
+import { logError, logInfo, getLogFilePath } from './lib/logger';
 
 /**
  * Gets the current app version from package.json
@@ -275,17 +275,101 @@ export function createMenu(mainWindow: BrowserWindow): void {
         {
           label: 'Ubicación de la base de datos',
           click: () => {
-            if (mainWindow) {
-              const userDataPath = app.getPath('userData');
-              const dbPath = path.join(userDataPath, 'database', 'medical_control.db');
+            try {
+              if (mainWindow) {
+                const userDataPath = app.getPath('userData');
+                const dbPath = path.join(userDataPath, 'database', 'medical_control.db');
 
-              dialog.showMessageBox(mainWindow, {
-                type: 'warning',
-                title: 'Ubicación de la base de datos',
-                message: 'Ubicación de la base de datos',
-                detail: `La base de datos se encuentra en:\n\n${dbPath}\n\n⚠️ IMPORTANTE: No modifiques este archivo manualmente. Cualquier modificación directa puede corromper los datos y hacer que la aplicación deje de funcionar correctamente.\n\nSi necesitas hacer una copia de seguridad, usa la función de exportar datos desde el menú.`,
-                buttons: ['Entendido']
-              });
+                dialog.showMessageBox(mainWindow, {
+                  type: 'warning',
+                  title: 'Ubicación de la base de datos',
+                  message: 'Ubicación de la base de datos',
+                  detail: `La base de datos se encuentra en:\n\n${dbPath}\n\n⚠️ IMPORTANTE: No modifiques este archivo manualmente. Cualquier modificación directa puede corromper los datos y hacer que la aplicación deje de funcionar correctamente.\n\nSi necesitas hacer una copia de seguridad, usa la función de exportar datos desde el menú.`,
+                  buttons: ['Entendido']
+                });
+              }
+            } catch (error) {
+              logError('Error in menu: Ubicación de la base de datos', error, 'menu-db-location');
+            }
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Logs',
+          click: async () => {
+            try {
+              if (mainWindow) {
+                const logPath = getLogFilePath();
+                if (!logPath || !existsSync(logPath)) {
+                  dialog.showMessageBox(mainWindow, {
+                    type: 'info',
+                    title: 'Archivo de registro',
+                    message: 'Archivo de registro no encontrado',
+                    detail: 'El archivo de registro aún no ha sido creado o no está disponible.',
+                    buttons: ['Entendido']
+                  });
+                  return;
+                }
+
+                const response = await dialog.showMessageBox(mainWindow, {
+                  type: 'info',
+                  title: 'Archivo de registro',
+                  message: 'Archivo de registro',
+                  detail: `Ubicación:\n${logPath}\n\n¿Qué deseas hacer?`,
+                  buttons: ['Copiar ruta', 'Exportar archivo', 'Abrir carpeta', 'Cerrar'],
+                  defaultId: 0,
+                  cancelId: 3
+                });
+
+                if (response.response === 0) {
+                  // Copy path to clipboard
+                  clipboard.writeText(logPath);
+                  dialog.showMessageBox(mainWindow, {
+                    type: 'info',
+                    title: 'Ruta copiada',
+                    message: 'La ruta del archivo de registro ha sido copiada al portapapeles',
+                    buttons: ['Entendido']
+                  });
+                  logInfo('Menu: Log file path copied to clipboard');
+                } else if (response.response === 1) {
+                  // Export log file
+                  const result = await dialog.showSaveDialog(mainWindow, {
+                    title: 'Exportar archivo de registro',
+                    defaultPath: `medical_control_log_${new Date().toISOString().split('T')[0]}.log`,
+                    filters: [
+                      { name: 'Archivos de registro', extensions: ['log', 'txt'] },
+                      { name: 'Todos los archivos', extensions: ['*'] }
+                    ]
+                  });
+
+                  if (!result.canceled && result.filePath) {
+                    copyFileSync(logPath, result.filePath);
+                    dialog.showMessageBox(mainWindow, {
+                      type: 'info',
+                      title: 'Archivo exportado',
+                      message: 'El archivo de registro ha sido exportado exitosamente',
+                      detail: `Guardado en:\n${result.filePath}`,
+                      buttons: ['Entendido']
+                    });
+                    logInfo('Menu: Log file exported', { path: result.filePath });
+                  }
+                } else if (response.response === 2) {
+                  // Open folder
+                  shell.showItemInFolder(logPath);
+                  logInfo('Menu: Log file folder opened');
+                }
+              }
+            } catch (error) {
+              logError('Error in menu: Ver archivo de registro', error, 'menu-view-log');
+              if (mainWindow) {
+                dialog.showMessageBox(mainWindow, {
+                  type: 'error',
+                  title: 'Error',
+                  message: 'No se pudo acceder al archivo de registro',
+                  detail: error instanceof Error ? error.message : String(error),
+                  buttons: ['Entendido']
+                });
+              }
             }
           }
         }
@@ -293,7 +377,7 @@ export function createMenu(mainWindow: BrowserWindow): void {
     }
   ];
 
-  let template = buildMenuTemplate();
+  const template = buildMenuTemplate();
 
   // macOS specific menu adjustments
   if (process.platform === 'darwin') {
