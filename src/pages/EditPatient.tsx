@@ -31,6 +31,8 @@ export default function EditPatient() {
   });
   const [editingConsultation, setEditingConsultation] = useState<Consultation | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchTreatments = async (page: number = 1) => {
     if (!id) return;
@@ -177,6 +179,27 @@ export default function EditPatient() {
     }
   };
 
+  const handlePatientDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    setErrors({});
+    try {
+      const response = await fetch(apiUrl(`/api/patients/${id}`), { method: 'DELETE' });
+      if (response.ok) {
+        setShowDeleteConfirm(false);
+        navigate('/');
+      } else {
+        const error = await response.json();
+        setErrors({ submit: error.error || 'Error eliminando al paciente' });
+      }
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      setErrors({ submit: 'Error eliminando al paciente' });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent, treatmentData?: { date: string; procedure: string; meds: string }) => {
     e.preventDefault();
     setLoading(true);
@@ -235,6 +258,13 @@ export default function EditPatient() {
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-slate-900">Editar Paciente</h1>
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            className="cursor-pointer text-sm text-slate-400 transition hover:text-red-600 focus-visible:outline-none"
+          >
+            Eliminar paciente
+          </button>
         </div>
 
         {errors.submit && (
@@ -265,6 +295,42 @@ export default function EditPatient() {
           onCancel={() => navigate('/')}
         />
 
+        {/* Delete patient confirmation modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+            <div className="w-full max-w-md">
+              <div className="rounded-2xl bg-white shadow-xl">
+                <div className="px-6 py-5">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    Eliminar paciente
+                  </h3>
+                  <p className="mt-2 text-sm text-slate-600">
+                    ¿Está seguro de que desea eliminar a este paciente y todos sus tratamientos? Esta acción no se puede deshacer.
+                  </p>
+                  <div className="mt-6 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(false)}
+                      disabled={deleting}
+                      className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handlePatientDelete}
+                      disabled={deleting}
+                      className="cursor-pointer rounded-full bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-red-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {deleting ? 'Eliminando…' : 'Eliminar'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Edit Consultation Modal */}
         {showEditModal && editingConsultation && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
@@ -280,7 +346,7 @@ export default function EditPatient() {
                       setShowEditModal(false);
                       setEditingConsultation(null);
                     }}
-                    className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                    className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
                   >
                     <svg className="h-3 w-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                       <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -320,7 +386,7 @@ export default function EditPatient() {
                     <div className="flex justify-end gap-2">
                       <button
                         type="submit"
-                        className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100"
+                        className="cursor-pointer rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100"
                       >
                         Actualizar Tratamiento
                       </button>
@@ -330,7 +396,7 @@ export default function EditPatient() {
                           setShowEditModal(false);
                           setEditingConsultation(null);
                         }}
-                        className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200"
+                        className="cursor-pointer rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200"
                       >
                         Cancelar
                       </button>

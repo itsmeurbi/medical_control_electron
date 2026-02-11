@@ -2,7 +2,7 @@
 set -e
 
 # Get tag from command line argument or use default
-TAG="${1:-v1.0.0}"
+TAG="${1}"
 
 if [ -z "$TAG" ]; then
   echo "Error: Tag name is required"
