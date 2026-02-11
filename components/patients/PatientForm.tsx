@@ -25,6 +25,19 @@ interface PatientFormProps {
   onCancel?: () => void;
 }
 
+function formatDateOnly(dateStr: string): string {
+  const dateOnly = dateStr.includes('T') ? dateStr.split('T')[0] : dateStr;
+  const [y, m, d] = dateOnly.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  if (Number.isNaN(date.getTime())) return 'Sin fecha';
+  const formatted = date.toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+  return formatted.replace(/ de (\d{4})$/, ' del $1');
+}
+
 export default function PatientForm({
   formData = {},
   setFormData,
@@ -883,13 +896,7 @@ export default function PatientForm({
                         </button>
                         <h4 className="text-sm font-semibold text-slate-700">F. del tratamiento</h4>
                         <p className="ml-2 text-sm text-slate-600">
-                          {t.date
-                            ? new Date(t.date).toLocaleDateString('es-ES', {
-                                day: 'numeric',
-                                month: 'long',
-                                year: 'numeric',
-                              })
-                            : 'Sin fecha'}
+                          {t.date ? formatDateOnly(t.date) : 'Sin fecha'}
                         </p>
                         {t.procedure && (
                           <>
